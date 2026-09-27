@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nothing In It</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://player.vimeo.com/api/player.js"></script>
+<script src="config.js"></script>
+<script src="content/questions.js"></script>
+<style>
+  :root { --blue:#0061ad; --blue-dark:#004e8c; --blue-pale:#e9f1f9; --ink:#2b2f33; --grey:#60666d; --line:#dee0e1; --amber:#f2a900; --amber-pale:#fff6dd; --white:#ffffff; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; background:#dfe4ea; overflow:hidden; }
+  body { font-family:Arial, Helvetica, sans-serif; color:var(--ink); display:flex; align-items:center; justify-content:center; }
+  h1, h2, .eyebrow, .pill, .L, .pts, .tag, button { font-family:'Montserrat', Arial, sans-serif; }
+  #stage { position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16 / 9; container-type:inline-size; overflow:hidden; background:var(--white); display:flex; flex-direction:column; }
+  .bar { flex:0 0 auto; background:var(--blue); height:7.5cqw; display:flex; align-items:center; justify-content:space-between; padding:0 3cqw 0 0; }
+  .bar img { height:100%; }
+  .bar span { color:#cfe2f3; font-family:'Montserrat', Arial, sans-serif; font-weight:700; font-size:1.3cqw; letter-spacing:.25cqw; text-transform:uppercase; }
+  #panel { flex:1; min-height:0; display:flex; flex-direction:column; padding:2.4cqw 4cqw 2cqw; }
+  section { display:none; flex:1; flex-direction:column; min-height:0; }
+  section.on { display:flex; }
+  .center { align-items:center; justify-content:center; text-align:center; }
+  .eyebrow { font-weight:700; text-transform:uppercase; letter-spacing:.3cqw; font-size:1.2cqw; color:var(--blue); margin:0 0 .8cqw; }
+  .muted { color:var(--grey); }
+  .big-head { font-size:3.6cqw; font-weight:800; color:var(--blue); margin:0 0 1.4cqw; line-height:1.1; }
+
+  /* Join */
+  #v-join { flex-direction:row; align-items:center; gap:4cqw; }
+  .join-left { flex:1; }
+  .game-title { font-size:6cqw; font-weight:800; color:var(--blue); margin:0 0 1.2cqw; line-height:1; }
+  .game-sub { font-size:1.9cqw; line-height:1.4; margin:0; max-width:42cqw; }
+  .join-right { display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .qr-card { background:#fff; border:.3cqw solid var(--blue); border-radius:1.4cqw; padding:1cqw; }
+  #qr { width:19cqw; height:19cqw; }
+  #qr img, #qr canvas { width:100% !important; height:100% !important; }
+  .join-title { font-family:'Montserrat', Arial, sans-serif; font-size:1.8cqw; font-weight:700; color:var(--ink); margin:1.4cqw 0 .3cqw; }
+  .join-url { font-size:1cqw; color:var(--grey); margin:0; word-break:break-all; max-width:26cqw; }
+  .join-count { margin-top:1.2cqw; font-family:'Montserrat', Arial, sans-serif; font-size:1.7cqw; font-weight:700; color:var(--blue); }
+
+  /* Video: fills the whole screen */
+  #v-video { position:absolute; inset:0; background:#000; z-index:5; }
+  #videoBox { position:absolute; inset:0; }
+  #videoBox iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  #vidLabel { position:absolute; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; z-index:6; }
+  #vidLabel.on { display:block; }
+
+  /* Question and voting */
+  .q-top { display:flex; align-items:center; justify-content:space-between; gap:1cqw; }
+  .pill { font-size:1.15cqw; font-weight:800; text-transform:uppercase; letter-spacing:.15cqw; padding:.5cqw 1.3cqw; border-radius:99cqw; background:var(--line); color:var(--grey); margin-right:9cqw; }
+  .pill.open { background:var(--blue); color:#fff; }
+  #qText { font-size:2.7cqw; font-weight:800; line-height:1.2; margin:.2cqw 0 1.6cqw; color:var(--ink); }
+  .opts { display:flex; flex-direction:column; gap:1cqw; }
+  .opt { display:flex; align-items:center; gap:1.2cqw; border:.2cqw solid var(--line); border-radius:1cqw; padding:1.1cqw 1.4cqw; font-size:2cqw; font-weight:700; line-height:1.25; background:#fff; }
+  .L { flex:0 0 auto; width:3.2cqw; height:3.2cqw; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.7cqw; }
+  .setup { margin-top:1.6cqw; border-left:.5cqw solid var(--blue); background:var(--blue-pale); padding:1cqw 1.4cqw; font-size:1.6cqw; line-height:1.4; border-radius:0 .8cqw .8cqw 0; }
+  .q-foot { margin-top:auto; padding-top:1cqw; font-family:'Montserrat', Arial, sans-serif; font-size:1.4cqw; font-weight:700; color:var(--blue); }
+
+  /* Reveal */
+  .rv { display:flex; flex-direction:column; gap:.9cqw; }
+  .rv-row { display:flex; gap:1.2cqw; align-items:flex-start; border:.2cqw solid var(--line); border-radius:1cqw; padding:1cqw 1.3cqw; }
+  .rv-row.best { border-color:var(--amber); background:var(--amber-pale); }
+  .rv-row.best .L { background:var(--amber); color:#3b2a00; }
+  .rv-mid { flex:1; min-width:0; }
+  .rv-title { font-family:'Montserrat', Arial, sans-serif; font-size:1.75cqw; font-weight:800; margin:0 0 .3cqw; }
+  .rv-why { font-size:1.35cqw; line-height:1.35; margin:0; color:var(--ink); }
+  .rv-right { flex:0 0 13cqw; text-align:right; }
+  .pts { font-size:2.6cqw; font-weight:800; color:var(--blue); line-height:1; }
+  .rv-row.best .pts { color:#a86f00; }
+  .tsr { font-size:1cqw; color:var(--grey); margin:.3cqw 0 .5cqw; }
+  .votes { font-family:'Montserrat', Arial, sans-serif; font-size:1.2cqw; font-weight:700; color:var(--ink); }
+  .tag { display:inline-block; background:var(--amber); color:#3b2a00; font-size:.95cqw; font-weight:800; text-transform:uppercase; letter-spacing:.1cqw; padding:.2cqw .7cqw; border-radius:99cqw; margin-left:.6cqw; vertical-align:middle; }
+
+  /* Say it out loud */
+  .rh-text { font-size:2.4cqw; line-height:1.4; font-weight:700; margin:0 0 1.6cqw; max-width:72cqw; }
+  .rh-small { font-size:1.6cqw; margin:0; }
+
+  /* Three weeks later */
+  .lt-day { font-size:1.6cqw; line-height:1.4; margin:0 0 1.4cqw; color:var(--grey); }
+  .lt-list { display:flex; gap:1.4cqw; }
+  .lt-card { flex:1; border:.2cqw solid var(--line); border-radius:1cqw; padding:1.2cqw 1.4cqw; font-size:1.45cqw; line-height:1.4; }
+  .lt-card b { display:block; font-family:'Montserrat', Arial, sans-serif; color:var(--blue); font-size:1.3cqw; text-transform:uppercase; letter-spacing:.15cqw; margin-bottom:.5cqw; }
+
+  /* Scores and winner */
+  .board { display:grid; grid-auto-flow:column; grid-template-rows:repeat(5, auto); gap:.8cqw 2cqw; }
+  .board.one-col { grid-auto-flow:row; }
+  .brow { display:flex; align-items:center; gap:1cqw; background:var(--blue-pale); border-radius:.8cqw; padding:.8cqw 1.2cqw; font-size:1.8cqw; font-weight:700; }
+  .brow .rank { color:var(--blue); width:2.4cqw; font-family:'Montserrat', Arial, sans-serif; }
+  .brow .nm { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brow .p { font-family:'Montserrat', Arial, sans-serif; color:var(--blue); font-weight:800; }
+  .brow.lead { background:var(--amber-pale); box-shadow:0 0 0 .2cqw var(--amber); }
+  #winNames { font-family:'Montserrat', Arial, sans-serif; font-size:4.6cqw; font-weight:800; color:var(--blue); line-height:1.15; margin:0 0 1cqw; }
+  #winScore { font-size:2cqw; font-weight:700; margin:0 0 .6cqw; }
+  #winBand { font-size:2cqw; color:var(--grey); margin:0; font-style:italic; }
+
+  /* Countdown */
+  #countdown { position:absolute; top:9.5cqw; right:3cqw; width:7cqw; height:7cqw; border-radius:50%; border:.45cqw solid var(--blue); background:#fff; display:none; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-size:3cqw; font-weight:800; color:var(--blue); }
+  #countdown.on { display:flex; }
+  #countdown.hurry { border-color:var(--amber); color:#a86f00; }
+
+  /* Start overlay */
+  #start { position:fixed; inset:0; background:var(--blue); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
+  #start img { width:min(50vw, 700px); }
+  #start button { margin-top:4vh; font-size:clamp(18px, 2.2vw, 32px); font-weight:800; padding:1.1vw 3vw; border-radius:999px; border:none; background:#fff; color:var(--blue); cursor:pointer; }
+  #start p { color:#cfe2f3; font-size:clamp(13px, 1.1vw, 18px); margin-top:2vh; }
+  .hide { display:none !important; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="bar"><img id="barLogo" alt="Story"><span>Fairness, Inclusion and Respect</span></div>
+    <div id="panel">
+      <section id="v-waiting" class="on center"><p class="muted" style="font-size:2cqw">Waiting for the control screen to connect...</p></section>
+
+      <section id="v-join">
+        <div class="join-left">
+          <p class="eyebrow">Scenario activity</p>
+          <h1 class="game-title">Nothing In It</h1>
+          <p class="muted game-sub">Watch the scene. Talk it through as a table. Choose what you would do, then say it out loud.</p>
+        </div>
+        <div class="join-right">
+          <div class="qr-card"><div id="qr"></div></div>
+          <p class="join-title">Scan to join: one phone per table</p>
+          <p class="join-url" id="joinUrl"></p>
+          <p class="join-count" id="joinCount"></p>
+        </div>
+      </section>
+
+      <section id="v-question">
+        <div class="q-top"><p class="eyebrow" id="qEyebrow"></p><span class="pill" id="qPill"></span></div>
+        <h1 id="qText"></h1>
+        <div class="opts" id="qOpts"></div>
+        <div class="setup" id="qSetup"></div>
+        <div class="q-foot" id="qFoot"></div>
+      </section>
+
+      <section id="v-rehearse" class="center">
+        <p class="eyebrow" id="rhEyebrow"></p>
+        <h1 class="big-head">Say it out loud</h1>
+        <p class="rh-text" id="rhText"></p>
+        <p class="muted rh-small">Not a summary of what you would do. The actual words.</p>
+      </section>
+
+      <section id="v-reveal">
+        <p class="eyebrow" id="rvEyebrow"></p>
+        <h1 class="big-head" style="font-size:2.6cqw;margin-bottom:1cqw">How the room voted, and what it scored</h1>
+        <div class="rv" id="rvList"></div>
+      </section>
+
+      <section id="v-later">
+        <p class="eyebrow" id="ltEyebrow"></p>
+        <p class="lt-day" id="ltDay"></p>
+        <h1 class="big-head">Three weeks later</h1>
+        <div class="lt-list" id="ltList"></div>
+      </section>
+
+      <section id="v-scores">
+        <p class="eyebrow" id="scoreEyebrow"></p>
+        <h1 class="big-head">The scores</h1>
+        <div class="board" id="board"></div>
+      </section>
+
+      <section id="v-winner" class="center">
+        <p class="eyebrow">Final scores</p>
+        <h1 class="big-head" id="winHead"></h1>
+        <p id="winNames"></p>
+        <p id="winScore"></p>
+        <p id="winBand"></p>
+      </section>
+    </div>
+
+    <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div></section>
+    <div id="countdown"></div>
+  </div>
+
+  <div id="start">
+    <img id="startLogo" alt="Story">
+    <button id="startBtn">Click to start</button>
+    <p>Drag this window onto the projector first. This click turns the sound on and goes full screen.</p>
+  </div>
+
+<script>
+  var C = window.GG_CONFIG, G = window.GG_GAME, S = C.sounds;
+  var IMG = 'assets/images/', AUD = 'assets/audio/';
+  var el = function (id) { return document.getElementById(id); };
+  el('barLogo').src = IMG + C.images.logo;
+  el('startLogo').src = IMG + C.images.logo;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pts(q, L) { var x = q.scores && q.scores[L]; return x ? x.t + x.s + x.r : 0; }
+  function sign(n) { return (n > 0 ? '+' : '') + n; }
+
+  // ---- Sound ----
+  var started = false, actx = null, sounds = [], musicOn = true;
+  function stopAudio() { sounds.forEach(function (a) { try { a.pause(); } catch (e) {} }); sounds = []; }
+  function play(f, vol, loop, isMusic, onDone) {
+    if (!f) { if (onDone) onDone(); return null; }
+    var a = new Audio(AUD + f);
+    a.base = vol; a.isMusic = !!isMusic; a.loop = !!loop;
+    a.volume = (isMusic && !musicOn) ? 0 : vol;
+    if (onDone) { a.addEventListener('ended', onDone); a.addEventListener('error', onDone); }
+    sounds.push(a);
+    var p = a.play(); if (p && p.catch) p.catch(function () { if (onDone) onDone(); });
+    return a;
+  }
+  function applyMusic() { sounds.forEach(function (a) { if (a.isMusic) { try { a.volume = musicOn ? a.base : 0; } catch (e) {} } }); }
+  function report(type, st) { if (window.opener) { try { window.opener.postMessage({ type: type, q: st ? st.q : 0 }, '*'); } catch (e) {} } }
+  function beep(freq, dur) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+
+  function playCue(st) {
+    switch (st.phase) {
+      case 'question': stopAudio(); setTimeout(function () { report('question-done', st); }, 1500); break;
+      case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
+      case 'closed':
+        stopAudio();
+        var done = false, fin = function () { if (done) return; done = true; setTimeout(function () { report('closed-done', st); }, 1000); };
+        play(st.closeReason === 'votes-in' ? S.votesIn : S.timesUp, 1, false, false, fin);
+        break;
+      case 'reveal': stopAudio(); play(S.reveal, 1); break;
+      case 'winner': stopAudio(); play(S.showEnd, 0.9, false, true); play(S.applause, 1); break;
+      default: stopAudio();
+    }
+  }
+
+  // ---- Voting timer (beeps in the last 5 seconds) ----
+  var lastBeep = null;
+  setInterval(function () {
+    var st = current, box = el('countdown');
+    if (!st || st.phase !== 'voting' || !st.endsAt) { box.className = ''; return; }
+    var left = Math.max(0, Math.ceil((st.endsAt - Date.now()) / 1000));
+    box.className = 'on' + (left <= 10 ? ' hurry' : '');
+    box.textContent = left >= 60 ? Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2) : left;
+    if (started && left <= 5 && left > 0 && lastBeep !== st.endsAt + '-' + left) {
+      lastBeep = st.endsAt + '-' + left; beep(left === 1 ? 880 : 660, 0.18);
+    }
+  }, 200);
+
+  // ---- Video: plays one section of the scenario video, then tells the control screen ----
+  var player = null, videoKey = null, videoDone = false;
+  function startVideo(key, from, to, branch, labelA, labelB) {
+    if (videoKey === key) return;
+    stopVideo();
+    videoKey = key; videoDone = false;
+    var lab = el('vidLabel');
+    lab.className = ''; lab.textContent = '';
+    var f = document.createElement('iframe');
+    f.src = 'https://player.vimeo.com/video/' + C.vimeoId + '?h=' + C.vimeoHash + '&badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
+    f.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media';
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.title = 'Scenario video';
+    el('videoBox').appendChild(f);
+    function finish() {
+      if (videoDone) return; videoDone = true;
+      try { player.pause(); } catch (e) {}
+      report('video-ended');
+    }
+    try {
+      player = new Vimeo.Player(f);
+      player.ready().then(function () { return player.setCurrentTime(from); }).then(function () { return player.play(); }).catch(function () {});
+      player.on('timeupdate', function (d) {
+        if (branch) {
+          var txt = d.seconds < branch ? labelA : labelB;
+          if (lab.textContent !== txt) { lab.textContent = txt; lab.className = 'on'; }
+        }
+        if (to && d.seconds >= to - 0.2) finish();
+      });
+      player.on('ended', finish);
+    } catch (e) { player = null; }
+  }
+  function stopVideo() {
+    if (!videoKey) return;
+    videoKey = null;
+    try { if (player) player.unload(); } catch (e) {}
+    player = null;
+    el('videoBox').innerHTML = '';
+    el('vidLabel').className = '';
+  }
+
+  // ---- Drawing each screen ----
+  var lastQrUrl = '', lastSig = '', lastCue = null, current = null;
+  function showSection(id) {
+    document.querySelectorAll('section').forEach(function (s) { s.classList.toggle('on', s.id === id); });
+  }
+  function playVideoFor(st) {
+    if (st.phase === 'scene') { var sc = G.questions[st.q].scene; startVideo('scene-' + st.q, sc.start, sc.end, sc.branch, sc.labelA, sc.labelB); }
+    if (st.phase === 'lastword') startVideo('lastword', G.lastWord.start, null);
+  }
+
+  function render(st) {
+    var sig = JSON.stringify([st.phase, st.q, st.joinUrl, st.teamCount, st.answered, st.counts, st.scores, st.winners, st.closeReason]);
+    if (sig === lastSig) return;
+    lastSig = sig;
+    if (st.phase === 'scene' || st.phase === 'lastword') { showSection('v-video'); if (started) playVideoFor(st); return; }
+    stopVideo();
+    var q = G.questions[st.q], r = G.rounds[st.round];
+    var roundText = r ? r.label + '  |  ' + r.title : '';
+
+    if (st.phase === 'join') {
+      showSection('v-join');
+      el('joinUrl').textContent = st.joinUrl;
+      el('joinCount').textContent = st.teamCount === 1 ? '1 table has joined' : st.teamCount + ' tables have joined';
+      if (st.joinUrl && st.joinUrl !== lastQrUrl) {
+        lastQrUrl = st.joinUrl; el('qr').innerHTML = '';
+        new QRCode(el('qr'), { text: st.joinUrl, width: 512, height: 512, colorDark: '#0061ad', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      }
+      return;
+    }
+
+    if (st.phase === 'question' || st.phase === 'voting' || st.phase === 'closed') {
+      showSection('v-question');
+      el('qEyebrow').textContent = roundText;
+      var pill = el('qPill');
+      pill.className = 'pill' + (st.phase === 'voting' ? ' open' : '');
+      pill.textContent = st.phase === 'voting' ? 'Discuss and vote' : st.phase === 'closed' ? (st.closeReason === 'votes-in' ? 'The votes are in' : "Time's up") : 'Get ready';
+      el('qText').textContent = q.text;
+      el('qOpts').innerHTML = Object.keys(q.options).map(function (L) {
+        return '<div class="opt"><span class="L">' + L + '</span><span>' + esc(q.options[L]) + '</span></div>';
+      }).join('');
+      el('qSetup').textContent = q.setup || '';
+      el('qSetup').style.display = q.setup ? 'block' : 'none';
+      el('qFoot').textContent = st.phase === 'question' ? 'Voting opens in a moment' : st.answered + ' of ' + st.teamCount + (st.teamCount === 1 ? ' table has' : ' tables have') + ' voted';
+      return;
+    }
+
+    if (st.phase === 'rehearse') {
+      showSection('v-rehearse');
+      el('rhEyebrow').textContent = roundText;
+      el('rhText').textContent = q.rehearse;
+      return;
+    }
+
+    if (st.phase === 'reveal') {
+      showSection('v-reveal');
+      el('rvEyebrow').textContent = roundText;
+      el('rvList').innerHTML = Object.keys(q.options).map(function (L) {
+        var best = L === q.answer, x = q.scores[L], n = (st.counts && st.counts[L]) || 0;
+        return '<div class="rv-row' + (best ? ' best' : '') + '"><span class="L">' + L + '</span>' +
+          '<div class="rv-mid"><p class="rv-title">' + esc(q.options[L]) + (best ? '<span class="tag">Strongest</span>' : '') + '</p>' +
+          '<p class="rv-why">' + esc(q.why[L]) + '</p></div>' +
+          '<div class="rv-right"><div class="pts">' + sign(pts(q, L)) + '</div>' +
+          '<div class="tsr">Trust ' + sign(x.t) + '  Signal ' + sign(x.s) + '  Risk ' + sign(x.r) + '</div>' +
+          '<div class="votes">' + n + (n === 1 ? ' table' : ' tables') + '</div></div></div>';
+      }).join('');
+      return;
+    }
+
+    if (st.phase === 'later') {
+      showSection('v-later');
+      el('ltEyebrow').textContent = roundText;
+      el('ltDay').textContent = q.thatDay ? 'That day: ' + q.thatDay : '';
+      el('ltDay').style.display = q.thatDay ? 'block' : 'none';
+      var keys = Object.keys(q.later || {});
+      el('ltList').innerHTML = keys.map(function (L) {
+        return '<div class="lt-card"><b>If you chose ' + L + '</b>' + esc(q.later[L]) + '</div>';
+      }).join('');
+      return;
+    }
+
+    if (st.phase === 'scoreboard') {
+      showSection('v-scores');
+      el('scoreEyebrow').textContent = 'After ' + (r ? r.label : '');
+      drawBoard(st.scores);
+      return;
+    }
+
+    if (st.phase === 'winner') {
+      showSection('v-winner');
+      var w = st.winners || [];
+      if (!w.length) { el('winHead').textContent = 'Thanks for taking part'; el('winNames').textContent = ''; el('winScore').textContent = ''; el('winBand').textContent = ''; return; }
+      el('winHead').textContent = w.length > 1 ? 'Our joint winners' : 'Our winning table';
+      el('winNames').textContent = w.join('  &  ');
+      el('winScore').textContent = st.topScore + ' out of 15 points';
+      el('winBand').textContent = st.band ? '\u201C' + st.band + '\u201D' : '';
+      return;
+    }
+  }
+
+  function drawBoard(scores) {
+    var list = (scores || []).slice(0, 10);
+    var b = el('board');
+    b.classList.toggle('one-col', list.length <= 5);
+    var top = list.length ? list[0].score : 0;
+    var rank = 0, prev = null;
+    b.innerHTML = list.map(function (x, i) {
+      if (x.score !== prev) { rank = i + 1; prev = x.score; }
+      return '<div class="brow' + (x.score === top ? ' lead' : '') + '"><span class="rank">' + rank + '</span><span class="nm">' +
+        esc(x.name) + '</span><span class="p">' + x.score + '</span></div>';
+    }).join('') || '<p class="muted" style="font-size:1.6cqw">No tables have joined yet.</p>';
+  }
+
+  // ---- Messages from the control screen ----
+  var lastMsgAt = 0;
+  window.addEventListener('message', function (e) {
+    var m = e.data || {};
+    if (m.type !== 'display' || !m.state) return;
+    lastMsgAt = Date.now();
+    var st = m.state; current = st;
+    if (st.musicOn !== undefined && st.musicOn !== musicOn) { musicOn = st.musicOn; applyMusic(); }
+    render(st);
+    // Sounds fire once, and only if fresh (so a reload does not replay them).
+    if (st.cue && st.cue.id !== lastCue) {
+      lastCue = st.cue.id;
+      if (started && Date.now() - st.cue.at < 4000) playCue(st);
+    }
+  });
+
+  el('startBtn').addEventListener('click', function () {
+    started = true;
+    el('start').classList.add('hide');
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) {}
+    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+    if (current) playVideoFor(current);
+  });
+
+  // Tell the control screen we are here (and keep saying so if it is reloaded).
+  function sayReady() { if (window.opener) { try { window.opener.postMessage({ type: 'stage-ready' }, '*'); } catch (e) {} } }
+  sayReady();
+  setInterval(function () { if (Date.now() - lastMsgAt > 3000) sayReady(); }, 3000);
+</script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scenarios Game - Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="content/questions.js"></script>
+<style>
+  :root { --story-blue:#0061ad; --story-blue-dark:#004e8c; --text:#60666d; --filler:#dee0e1; --page-bg:#eef1f4; --white:#ffffff; --radius:14px; --green:#1f9d57; --red:#b00020; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--text); background:var(--page-bg); min-height:100vh; }
+  h1, h2, .wordmark, .eyebrow, .btn, .chip, .count, .now-title, .tally b { font-family:'Montserrat', Arial, sans-serif; }
+  .topbar { background:var(--story-blue); padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .wordmark { font-style:italic; font-weight:700; font-size:26px; letter-spacing:.5px; color:var(--white); line-height:1; }
+  .topbar .right { display:flex; align-items:center; gap:10px; color:#cfe2f3; font-weight:600; font-size:13px; letter-spacing:1px; text-transform:uppercase; }
+  .status-dot { width:11px; height:11px; border-radius:50%; background:#9fc4e6; }
+  .status-dot.live { background:#57e08a; } .status-dot.down { background:#ffd34e; }
+  main { max-width:1180px; margin:0 auto; padding:22px 20px 60px; display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:900px) { main { grid-template-columns:1fr; } }
+  .card { background:var(--white); border:1px solid var(--filler); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:0 6px 20px rgba(0,51,92,.05); }
+  .eyebrow { text-transform:uppercase; letter-spacing:1.5px; font-size:12px; font-weight:600; color:var(--story-blue); margin:0 0 6px; }
+  h2 { color:#2b2f33; font-weight:600; font-size:19px; margin:0 0 12px; }
+  p.helper { font-size:14px; line-height:1.5; margin:0 0 14px; }
+  .btn { border:none; border-radius:var(--radius); cursor:pointer; background:var(--story-blue); color:var(--white); font-size:15px; font-weight:600; padding:12px 20px; transition:background .15s; }
+  .btn:hover { background:var(--story-blue-dark); }
+  .btn:focus-visible { outline:3px solid #ffd34e; outline-offset:2px; }
+  .btn[disabled] { background:var(--filler); color:#9aa0a6; cursor:default; }
+  .btn.ghost { background:#e9f1f9; color:var(--story-blue); }
+  .btn.ghost:hover { background:#d8e7f5; }
+  .btn.warn { background:#fff; color:var(--red); border:2px solid #f0c4cb; }
+  .btn.warn:hover { background:#fdf0f2; }
+  .btn.big { width:100%; font-size:20px; padding:20px; margin:6px 0 12px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .stage-state { margin-top:10px; font-size:14px; font-weight:600; }
+  .stage-state.on { color:var(--green); }
+  .now-title { color:#2b2f33; font-size:24px; font-weight:700; margin:2px 0 10px; }
+  .qbox { background:#f5f8fb; border-radius:10px; padding:14px 16px; margin:0 0 12px; font-size:15px; line-height:1.5; color:#2b2f33; }
+  .qbox p { margin:0 0 8px; } .qbox p:last-child { margin-bottom:0; }
+  .qbox .ans { color:var(--green); font-weight:700; }
+  .qbox .lbl { font-weight:700; color:var(--story-blue); }
+  .err { color:var(--red); font-weight:600; font-size:14px; min-height:18px; margin:4px 0 0; }
+  select { font-size:14px; padding:10px; border-radius:10px; border:2px solid var(--filler); max-width:100%; }
+  .count { font-size:14px; color:var(--story-blue); font-weight:600; }
+  .teams { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .chip { background:#e9f1f9; color:var(--story-blue); font-weight:600; padding:7px 14px; border-radius:999px; font-size:14px; }
+  .chip.done { background:#e3f6ea; color:var(--green); }
+  .chip.done::before { content:"\2713  "; }
+  .empty { font-size:14px; font-style:italic; margin-top:6px; }
+  .tally { display:flex; gap:8px; margin-top:12px; }
+  .tally div { flex:1; text-align:center; background:#f5f8fb; border-radius:10px; padding:8px 4px; font-size:13px; }
+  .tally div.right { background:#e3f6ea; color:var(--green); }
+  .tally b { display:block; font-size:20px; color:#2b2f33; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td { padding:7px 4px; border-bottom:1px solid var(--filler); }
+  td.s { text-align:right; font-weight:700; color:#2b2f33; }
+  .mono { font-family:Consolas, monospace; font-size:13px; }
+  .ok { color:var(--green); font-weight:600; font-size:14px; min-height:18px; margin:8px 0 0; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="wordmark">STORY</span>
+    <span class="right"><span>Scenarios Game control</span><span class="status-dot" id="statusDot" title="Connection"></span></span>
+  </div>
+
+  <main>
+    <div>
+      <div class="card">
+        <p class="eyebrow">Before you start</p>
+        <h2>The big screen</h2>
+        <p class="helper">Open the big screen, drag it onto the projector, then click "Click to start the show" on it. That one click lets it play sound and goes full screen.</p>
+        <button class="btn" id="openBtn">Open big screen</button>
+        <div class="stage-state" id="stageState">Big screen: not open yet</div>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow" id="nowEyebrow">Step 1</p>
+        <div class="now-title" id="nowTitle">Join screen</div>
+        <div class="qbox" id="nowBox"></div>
+        <button class="btn big" id="nextBtn">Next</button>
+        <div class="row">
+          <button class="btn ghost" id="backBtn">Back one step</button>
+          <button class="btn ghost" id="cueBtn">5-second cue</button>
+          <button class="btn ghost" id="musicBtn">Music: on</button>
+          <select id="jumpSel" aria-label="Jump to a step"></select>
+        </div>
+        <p class="err" id="errLine"></p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <p class="eyebrow">Live</p>
+        <h2>Tables <span class="count" id="teamCount">(0)</span> <span class="count" id="answeredCount"></span> <span class="count" id="timerText"></span></h2>
+        <div class="teams" id="teamList"></div>
+        <p class="empty" id="teamEmpty">No tables yet. They pop up here as they join.</p>
+        <div class="tally" id="tally"></div>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Only you see this</p>
+        <h2>Scores so far</h2>
+        <table id="scoreTable"></table>
+        <p class="empty" id="scoreEmpty">Scores appear after the first reveal. Click a table during "Say it out loud" to give a bonus point.</p>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Session</p>
+        <h2>New cohort</h2>
+        <p class="helper">New session sends every phone back to the join screen and starts the scores from zero. Clear old sessions deletes previous cohorts' tables and votes from Supabase.</p>
+        <div class="row">
+          <button class="btn warn" id="newBtn">New session</button>
+          <button class="btn ghost" id="clearBtn">Clear old sessions</button>
+        </div>
+        <p class="helper" style="margin:12px 0 0;">Current session: <span class="mono" id="sessionText">...</span></p>
+        <p class="ok" id="sessionMsg"></p>
+      </div>
+    </div>
+  </main>
+
+<script>
+  var C = window.GG_CONFIG, G = window.GG_GAME;
+  var sb = supabase.createClient(C.supabaseUrl, C.supabaseKey);
+  var LETTERS = ['A', 'B', 'C', 'D'];
+
+  // ---- The running order, built from the rounds ----
+  // Each round: video scene, question, voting, closed, say it out loud, reveal, three weeks later, scores.
+  var STEPS = [{ phase: 'join', q: 0, round: -1 }];
+  G.rounds.forEach(function (r, ri) {
+    r.questions.forEach(function (n) {
+      var q = G.questions[n];
+      ['scene', 'question', 'voting', 'closed', 'rehearse', 'reveal'].forEach(function (p) { STEPS.push({ phase: p, q: n, round: ri }); });
+      if (q.thatDay || (q.later && Object.keys(q.later).length)) STEPS.push({ phase: 'later', q: n, round: ri });
+    });
+    var last = r.questions[r.questions.length - 1];
+    if (ri < G.rounds.length - 1) STEPS.push({ phase: 'scoreboard', q: last, round: ri });
+    else { STEPS.push({ phase: 'lastword', q: last, round: ri }); STEPS.push({ phase: 'winner', q: last, round: ri }); }
+  });
+  var TOTAL_Q = Object.keys(G.questions).length;
+
+  function pts(q, L) { var x = q.scores && q.scores[L]; return x ? x.t + x.s + x.r : 0; }
+  function band(score) { var b = (G.bands || []).filter(function (x) { return score >= x.min; })[0]; return b ? b.text : ''; }
+
+  function label(s) {
+    var R = s.round >= 0 ? G.rounds[s.round].label : '';
+    switch (s.phase) {
+      case 'join': return 'Join screen';
+      case 'scene': return R + ': play the scene (' + G.rounds[s.round].title + ')';
+      case 'question': return R + ': show the question';
+      case 'voting': return R + ': discuss and vote';
+      case 'closed': return R + ': close voting';
+      case 'rehearse': return R + ': say it out loud';
+      case 'reveal': return R + ': reveal and scores';
+      case 'later': return R + ': three weeks later';
+      case 'scoreboard': return 'Scoreboard after ' + R;
+      case 'lastword': return "Sophie's last word (video)";
+      case 'winner': return 'Final scores and winner';
+    }
+    return '';
+  }
+
+  // ---- State ----
+  var sessionId = null, step = 0, teams = [], votes = [], busy = false;
+  var cue = { id: 0, at: 0 };
+  var VOTE_MS = (C.votingSeconds || 60) * 1000;
+  var votingEndsAt = 0, closeReason = 'times-up', ending = false, autoReveal = false, revealFallback = null;
+  var musicOn = true;
+
+  var el = function (id) { return document.getElementById(id); };
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function setStatus(s) { var d = el('statusDot'); d.classList.remove('live', 'down'); if (s) d.classList.add(s); }
+  function showErr(t) { el('errLine').textContent = t || ''; }
+
+  // ---- Scores: worked out from the votes (Alex's points), plus any bonus points ----
+  // Bonus points are kept on this laptop: { teamId: { questionNumber: 1 } }
+  var bonus = {};
+  function bonusKey() { return 'sg_bonus_' + sessionId; }
+  function loadBonus() { try { bonus = JSON.parse(localStorage.getItem(bonusKey()) || '{}'); } catch (e) { bonus = {}; } }
+  function saveBonus() { try { localStorage.setItem(bonusKey(), JSON.stringify(bonus)); } catch (e) {} }
+  function revealedUpTo(s) { return ['reveal', 'later', 'scoreboard', 'lastword', 'winner'].indexOf(s.phase) > -1 ? s.q : s.q - 1; }
+  function scoreTable() {
+    var upto = revealedUpTo(STEPS[step]);
+    var byTeam = {};
+    teams.forEach(function (t) { byTeam[t.id] = { name: t.name, score: 0 }; });
+    votes.forEach(function (v) {
+      var q = G.questions[v.q];
+      if (byTeam[v.team_id] && q && v.q <= upto) byTeam[v.team_id].score += pts(q, v.choice);
+    });
+    Object.keys(bonus).forEach(function (id) {
+      if (byTeam[id]) Object.keys(bonus[id]).forEach(function (qn) { if (+qn <= upto) byTeam[id].score += 1; });
+    });
+    return Object.keys(byTeam).map(function (k) { return byTeam[k]; })
+      .sort(function (a, b) { return b.score - a.score || a.name.localeCompare(b.name); });
+  }
+
+  // ---- What the big screen needs ----
+  function stageState() {
+    var s = STEPS[step];
+    var qVotes = votes.filter(function (v) { return v.q === s.q; });
+    var counts = { A: 0, B: 0, C: 0, D: 0 };
+    qVotes.forEach(function (v) { counts[v.choice] = (counts[v.choice] || 0) + 1; });
+    var scores = scoreTable();
+    var top = scores.length ? scores[0].score : 0;
+    return {
+      phase: s.phase, q: s.q, round: s.round, total: TOTAL_Q,
+      joinUrl: C.joinUrl, teamCount: teams.length,
+      answered: qVotes.length, counts: counts,
+      scores: scores,
+      winners: scores.filter(function (x) { return x.score === top; }).map(function (x) { return x.name; }),
+      topScore: top, band: band(top),
+      cue: cue, endsAt: votingEndsAt, closeReason: closeReason, musicOn: musicOn
+    };
+  }
+
+  // ---- Talking to the big screen ----
+  var stageWin = null;
+  function sendToStage() {
+    var on = !!(stageWin && !stageWin.closed);
+    el('stageState').textContent = on ? 'Big screen: connected' : 'Big screen: not open';
+    el('stageState').classList.toggle('on', on);
+    if (on) stageWin.postMessage({ type: 'display', state: stageState() }, '*');
+  }
+  window.addEventListener('message', function (e) {
+    var m = e.data || {};
+    if (m.type === 'stage-ready') { if (!stageWin && e.source) stageWin = e.source; sendToStage(); }
+    if (m.type === 'video-ended' && (STEPS[step].phase === 'scene' || STEPS[step].phase === 'lastword')) goTo(step + 1);
+    // Max has finished reading the question: open voting.
+    if (m.type === 'question-done' && STEPS[step].phase === 'question' && m.q === STEPS[step].q) goTo(step + 1);
+    // "The votes are in" or "Time's up" has finished: reveal.
+    if (m.type === 'closed-done' && STEPS[step].phase === 'closed') finishClose();
+  });
+  el('openBtn').addEventListener('click', function () {
+    stageWin = window.open('stage.html', 'ggStage', 'width=1280,height=760');
+    setTimeout(sendToStage, 700);
+  });
+  setInterval(sendToStage, 1000);
+
+  // ---- Moving through the show ----
+  async function goTo(i) {
+    if (busy || i < 0 || i >= STEPS.length || !sessionId) return;
+    busy = true; renderControls();
+    var s = STEPS[i];
+    var res = await sb.from('sg_state')
+      .update({ step: i, phase: s.phase, q_index: s.q, updated_at: new Date().toISOString() })
+      .eq('id', 1).select('id');
+    busy = false;
+    if (res.error || !res.data || !res.data.length) {
+      showErr('Not saved: check the connection and press again.');
+      setStatus('down'); renderControls(); return;
+    }
+    showErr('');
+    step = i;
+    autoReveal = false; clearTimeout(revealFallback);
+    votingEndsAt = s.phase === 'voting' ? Date.now() + VOTE_MS : 0;
+    cue = { id: cue.id + 1, at: Date.now() };
+    render(); sendToStage(); poll();
+  }
+
+  // ---- Automatic voting: timer, "everyone has voted", then the reveal ----
+  function allIn() {
+    var s = STEPS[step], ids = {};
+    votes.forEach(function (v) { if (v.q === s.q) ids[v.team_id] = 1; });
+    return teams.length > 0 && Object.keys(ids).length >= teams.length;
+  }
+  async function endVoting() {
+    if (ending || busy || STEPS[step].phase !== 'voting') return;
+    ending = true;
+    closeReason = allIn() ? 'votes-in' : 'times-up';
+    await goTo(step + 1);
+    ending = false;
+    if (STEPS[step].phase === 'closed') {
+      autoReveal = true;
+      clearTimeout(revealFallback);
+      revealFallback = setTimeout(finishClose, 10000); // in case the big screen never reports back
+    }
+  }
+  function finishClose() {
+    clearTimeout(revealFallback);
+    if (!autoReveal || STEPS[step].phase !== 'closed') return;
+    autoReveal = false;
+    goTo(step + 1);
+  }
+  setInterval(function () {
+    if (STEPS[step].phase !== 'voting' || !votingEndsAt) { el('timerText').textContent = ''; return; }
+    var left = Math.max(0, Math.ceil((votingEndsAt - Date.now()) / 1000));
+    el('timerText').textContent = left + 's left';
+    if (allIn() || left <= 0) endVoting();
+  }, 250);
+  setInterval(function () { if (STEPS[step].phase === 'voting') poll(); }, 1000);
+
+  el('nextBtn').addEventListener('click', function () {
+    if (STEPS[step].phase === 'voting') endVoting(); else goTo(step + 1);
+  });
+  el('backBtn').addEventListener('click', function () { goTo(step - 1); });
+  el('jumpSel').addEventListener('change', function () { goTo(parseInt(this.value, 10)); });
+  // Music on/off: mutes the music straight away on the big screen. Max and the sound effects carry on.
+  el('musicBtn').addEventListener('click', function () {
+    musicOn = !musicOn;
+    this.textContent = musicOn ? 'Music: on' : 'Music: off';
+    sendToStage();
+  });
+  // 5-second cue: cut the time left to 5 seconds (phones follow via updated_at).
+  el('cueBtn').addEventListener('click', function () {
+    if (STEPS[step].phase !== 'voting') return;
+    var now = Date.now();
+    if (votingEndsAt - now <= 5000) return;
+    votingEndsAt = now + 5000;
+    sb.from('sg_state').update({ updated_at: new Date(votingEndsAt - VOTE_MS).toISOString() }).eq('id', 1).then(function () {});
+    sendToStage();
+  });
+
+  // ---- Director display ----
+  function renderControls() {
+    var s = STEPS[step], nxt = STEPS[step + 1];
+    el('nextBtn').textContent = nxt ? 'Next: ' + label(nxt) : 'End of the show';
+    el('nextBtn').disabled = busy || !nxt;
+    el('backBtn').disabled = busy || step === 0;
+    el('cueBtn').disabled = s.phase !== 'voting';
+    el('jumpSel').value = String(step);
+  }
+
+  function render() {
+    var s = STEPS[step];
+    el('nowEyebrow').textContent = 'Now showing, step ' + (step + 1) + ' of ' + STEPS.length;
+    el('nowTitle').textContent = label(s);
+    var html = '';
+    var q = G.questions[s.q];
+    if (s.phase === 'join') html = '<p>Tables scan the QR code and join, one phone per table. Press Next when everyone is in.</p>';
+    else if (s.phase === 'scene') html = '<p>The scene is playing. Voting opens by itself when it ends.</p>' + (q.scene.branch ? '<p><span class="lbl">Two versions:</span> the big screen labels which tables each part is for.</p>' : '');
+    else if (s.phase === 'lastword') html = '<p>Sophie, straight to camera. Do not talk over it and do not summarise it afterwards. The final scores follow by themselves.</p>';
+    else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';
+    else if (s.phase === 'winner') html = '<p>Final scores and the winner are on the big screen.</p>';
+    else {
+      html += '<p><span class="lbl">' + esc(G.rounds[s.round].label + ': ' + G.rounds[s.round].title) + '.</span> ' + esc(q.text) + '</p>';
+      if (s.phase === 'question' || s.phase === 'voting' || s.phase === 'closed') html += '<p><span class="lbl">Say before they discuss:</span> ' + esc(q.setup) + '</p>';
+      if (s.phase === 'rehearse') {
+        html += '<p><span class="lbl">Say it out loud:</span> ' + esc(q.rehearse) + '</p>';
+        html += '<p><span class="lbl">Listen for:</span> ' + esc(q.rehearseCheck) + '</p>';
+        html += '<p><span class="lbl">Bonus point:</span> click a table name on the right for the line you would want said on your site. Click again to take it off.</p>';
+      }
+      Object.keys(q.options).forEach(function (L) {
+        html += '<p' + (L === q.answer ? ' class="ans"' : '') + '>' + L + '. ' + esc(q.options[L]) + ' (' + (pts(q, L) > 0 ? '+' : '') + pts(q, L) + ')' + (L === q.answer ? ', strongest' : '') + '</p>';
+      });
+      if (q.note) html += '<p><span class="lbl">Note:</span> ' + esc(q.note) + '</p>';
+    }
+    el('nowBox').innerHTML = html;
+    renderControls();
+    renderLive();
+  }
+
+  function renderLive() {
+    var s = STEPS[step];
+    var showQ = ['voting', 'closed', 'reveal'].indexOf(s.phase) > -1;
+    var answeredIds = {};
+    votes.forEach(function (v) { if (v.q === s.q) answeredIds[v.team_id] = v.choice; });
+    el('teamCount').textContent = '(' + teams.length + ')';
+    el('answeredCount').textContent = showQ ? Object.keys(answeredIds).length + ' answered' : '';
+    el('teamEmpty').style.display = teams.length ? 'none' : 'block';
+    var canBonus = ['rehearse', 'reveal', 'later'].indexOf(s.phase) > -1;
+    el('teamList').innerHTML = teams.map(function (t) {
+      var b = bonus[t.id] && bonus[t.id][s.q];
+      return '<span class="chip' + (showQ && answeredIds[t.id] ? ' done' : '') + '" data-id="' + t.id + '" style="' + (canBonus ? 'cursor:pointer;' : '') + (b ? 'background:#fff3d6;color:#8a5a00;' : '') + '">' + esc(t.name) + (b ? ' +1' : '') + '</span>';
+    }).join('');
+    var q = G.questions[s.q];
+    if (showQ && q) {
+      el('tally').innerHTML = Object.keys(q.options).map(function (L) {
+        var n = 0; for (var k in answeredIds) if (answeredIds[k] === L) n++;
+        return '<div class="' + (L === q.answer && s.phase === 'reveal' ? 'right' : '') + '"><b>' + n + '</b>' + L + '</div>';
+      }).join('');
+    } else el('tally').innerHTML = '';
+    var scores = scoreTable();
+    var anyRevealed = revealedUpTo(s) >= 1;
+    el('scoreEmpty').style.display = anyRevealed && scores.length ? 'none' : 'block';
+    el('scoreTable').innerHTML = anyRevealed ? scores.map(function (x, i) {
+      return '<tr><td>' + (i + 1) + '. ' + esc(x.name) + '</td><td class="s">' + x.score + '</td></tr>';
+    }).join('') : '';
+  }
+
+  // Bonus point: click a table during "say it out loud", the reveal or "three weeks later".
+  el('teamList').addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip'), s = STEPS[step];
+    if (!chip || ['rehearse', 'reveal', 'later'].indexOf(s.phase) < 0) return;
+    var id = chip.getAttribute('data-id');
+    bonus[id] = bonus[id] || {};
+    if (bonus[id][s.q]) delete bonus[id][s.q]; else bonus[id][s.q] = 1;
+    saveBonus(); renderLive(); sendToStage();
+  });
+
+  // ---- Live data from Supabase ----
+  var polling = false;
+  async function poll() {
+    if (!sessionId || polling) return;
+    polling = true;
+    try {
+      var t = await sb.from('sg_teams').select('id, name, joined_at').eq('session_id', sessionId).order('joined_at', { ascending: true });
+      if (t.error) throw t.error;
+      var v = await sb.from('sg_votes').select('team_id, q, choice').eq('session_id', sessionId);
+      if (v.error) throw v.error;
+      teams = t.data || []; votes = v.data || [];
+      setStatus('live');
+      renderLive();
+    } catch (e) { setStatus('down'); }
+    polling = false;
+  }
+
+  // ---- Sessions ----
+  el('newBtn').addEventListener('click', async function () {
+    if (!confirm('Start a new session?\n\nEvery phone goes back to the join screen and the scores start from zero.')) return;
+    var id = 's-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 7);
+    var res = await sb.from('sg_state').update({ session_id: id, step: 0, phase: 'join', q_index: 0, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
+    if (res.error || !res.data || !res.data.length) { el('sessionMsg').textContent = ''; showErr('New session not saved: check the connection and try again.'); return; }
+    sessionId = id; step = 0; teams = []; votes = []; bonus = {};
+    cue = { id: cue.id + 1, at: Date.now() };
+    el('sessionText').textContent = sessionId;
+    el('sessionMsg').textContent = 'New session started. Phones will return to the join screen.';
+    showErr(''); render(); sendToStage(); poll();
+  });
+
+  el('clearBtn').addEventListener('click', async function () {
+    if (!confirm('Delete all tables and votes from previous sessions?\n\nThe current session is not touched.')) return;
+    var v = await sb.from('sg_votes').delete().neq('session_id', sessionId);
+    var t = await sb.from('sg_teams').delete().neq('session_id', sessionId);
+    if (v.error || t.error) { el('sessionMsg').textContent = ''; showErr('Could not clear old sessions: check the connection.'); return; }
+    showErr(''); el('sessionMsg').textContent = 'Old sessions cleared.';
+  });
+
+  // ---- Start up: pick up where the show was ----
+  el('jumpSel').innerHTML = STEPS.map(function (s, i) { return '<option value="' + i + '">' + (i + 1) + '. ' + label(s) + '</option>'; }).join('');
+  (async function () {
+    var res = await sb.from('sg_state').select('session_id, step').eq('id', 1).single();
+    if (res.error || !res.data) {
+      setStatus('down');
+      showErr('Cannot reach the sg_state table. Has supabase/schema.sql been run? Refresh to try again.');
+      return;
+    }
+    setStatus('live');
+    sessionId = res.data.session_id; loadBonus();
+    step = Math.min(Math.max(res.data.step || 0, 0), STEPS.length - 1);
+    el('sessionText').textContent = sessionId;
+    if (STEPS[step].phase === 'voting') votingEndsAt = Date.now() + VOTE_MS; // control panel reloaded mid-vote
+    render(); poll();
+    setInterval(poll, 2000);
+  })();
+</script>
+</body>
+</html>
