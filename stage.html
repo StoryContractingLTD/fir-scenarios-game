@@ -230,7 +230,7 @@
         play(st.closeReason === 'votes-in' ? S.votesIn : S.timesUp, 1, false, false, fin);
         break;
       case 'reveal': stopAudio(); play(S.reveal, 1); break;
-      case 'winner': stopAudio(); play(S.showEnd, 0.9, false, true); play(S.applause, 1); break;
+      case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
       default: stopAudio();
     }
   }

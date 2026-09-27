@@ -23,14 +23,9 @@ window.GG_CONFIG = {
   // ---- Discussion and voting time per round, in seconds ----
   votingSeconds: 180,
 
-  // ---- Sounds (in assets/audio). A missing file is simply skipped. ----
+  // ---- Sounds (in assets/audio). No voiceover and no applause in this game. ----
   sounds: {
-    votingMusic:  "voting-music.mp3",   // loops while tables discuss and vote
-    countdown:    "countdown.mp3",      // last 5 seconds (beeps if missing)
-    votesIn:      "votes-in.mp3",       // Max: "The votes are in!"
-    timesUp:      "times-up.mp3",       // Max: "Time's up!"
-    reveal:       "reveal.mp3",         // optional sting on the reveal
-    showEnd:      "show-end.mp3",       // music under the final scores, then up loud
-    applause:     "applause.wav"        // big finish
+    votingMusic:  "scenario-focus.mp3",   // loops while tables discuss and vote
+    showEnd:      "scenario-focus.mp3"    // loops under the final scores
   }
 };
