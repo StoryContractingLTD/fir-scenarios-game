@@ -1,7 +1,7 @@
 // =====================================================================
 // Scenario One: "Nothing In It"  (from Alex's FIR facilitator pack)
-// Each round: the video scene, a vote on A to C, a "say it out loud"
-// rehearsal, the reveal with Alex's scores, then "three weeks later".
+// Each round: the video scene, a vote on A to C, a "your words" step
+// (tables write their exact words and read them from the paper; no role play), the reveal with Alex's scores, then "three weeks later".
 // Points per option are Trust + Signal + Risk from the pack.
 // Times are in seconds (1:55 = 115).
 // =====================================================================
@@ -46,7 +46,7 @@ window.GG_GAME = {
         B: "She will say \"honestly it's fine\". You have handed the decision to the person with the least power to make it.",
         C: "\"Dan, we don't grade people's looks in briefings. Anyone. Plan's sound, let's crack on.\" Then tell Sophie it was your call, not hers."
       },
-      rehearse: "One person from each table stands and says your line to the room, in under five seconds. The actual words, not a summary.",
+      rehearse: "As a table, agree the exact words you would say in the cabin, in under five seconds, and write them down. Then one person reads your table's line out from the paper.",
       rehearseCheck: "Did it address the standard, or make Sophie the subject? \"We don't do that here\" passes. \"Sophie's a professional\" fails.",
       thatDay: "Four seconds of awkwardness, then the briefing carries on. Dan says nothing about it. Neither does Sophie.",
       later: {
@@ -79,8 +79,8 @@ window.GG_GAME = {
         B: "Sophie is back on setting-out from Monday. He complies, resentfully, and still has no idea where the line is.",
         C: "Be concrete about the line, then handle work allocation as a management standard: it follows development need and competence."
       },
-      rehearse: "Pairs, three minutes, then swap. One of you plays Dan from the role card. The manager gets through it without backing down and without making Dan the problem.",
-      rehearseCheck: "If Dan goes quiet and compliant, the manager has lost. Watch for pairs who sort it in ninety seconds because Dan was played as reasonable.",
+      rehearse: "Read case file 1, Dan's side. He has said: \"Fine, whatever you want.\" and gone quiet. As a table, write the exact words you would say next, then one person reads them out from the paper.",
+      rehearseCheck: "Does the line keep the conversation open without backing down, and without making Dan the problem? If the table lets \"fine, whatever you want\" end it, the manager has lost. Watch for tables who skip the hard part and write a line for an easy, reasonable Dan.",
       thatDay: "",
       later: {
         A: "Dan is back to himself. Sophie is still mostly on paperwork. Nobody decided that, it just settled that way.",
@@ -110,7 +110,7 @@ window.GG_GAME = {
         B: "Correct on paper, useless on site. Slow, it takes Sophie out of a process about her, and nobody in that room saw you do anything.",
         C: "\"Marcus, Sophie's the engineer on this job. Let's keep it to that.\" Tell Sophie you have done it, and log it: date, what was said, what you did."
       },
-      rehearse: "The hardest interrupt. Under five seconds, said to someone playing Marcus from the role card.",
+      rehearse: "Read case file 2, Marcus. He has just said: \"Steady on, no offence meant.\" and looked round the table for a laugh. As a table, write the exact words you would say back, in under five seconds, then one person reads them out from the paper.",
       rehearseCheck: "Expect this to be much harder than Round 1, and say so: the sentence is easier, the person is harder.",
       thatDay: "",
       later: {},
