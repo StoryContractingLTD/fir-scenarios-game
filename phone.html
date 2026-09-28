@@ -234,7 +234,7 @@
     join: "You're in. Watch the big screen, the scene starts soon.",
     scene: 'Eyes on the big screen: watch the scene.',
     question: 'The question is on the big screen. Voting opens in a moment.',
-    rehearse: 'Say it out loud: the actual words your table would use.',
+    rehearse: 'Your words: write down the exact words your table would use, then read them out from the paper.',
     reveal: 'The scores for this round are on the big screen.',
     later: 'Three weeks later: find your table on the big screen.',
     scoreboard: 'The scores are on the big screen.',
@@ -251,7 +251,7 @@
     }
     if (sending) return;
     var msg = WAIT[st.phase] || 'Watch the big screen.';
-    if (st.phase === 'closed') msg = voted[qn] ? 'Voting has closed. You answered ' + voted[qn] + '. Get ready to say it out loud.' : 'Voting has closed. No answer from your table this time.';
+    if (st.phase === 'closed') msg = voted[qn] ? 'Voting has closed. You answered ' + voted[qn] + '. Get ready to write your words.' : 'Voting has closed. No answer from your table this time.';
     var s = 'wait-' + st.phase + '-' + qn + '-' + (voted[qn] || '');
     if (sig === s) return;
     sig = s;

@@ -106,7 +106,7 @@
         <p class="eyebrow">Only you see this</p>
         <h2>Scores so far</h2>
         <table id="scoreTable"></table>
-        <p class="empty" id="scoreEmpty">Scores appear after the first reveal. Click a table during "Say it out loud" to give a bonus point.</p>
+        <p class="empty" id="scoreEmpty">Scores appear after the first reveal. Click a table during "Your words" to give a bonus point.</p>
       </div>
 
       <div class="card">
@@ -129,7 +129,7 @@
   var LETTERS = ['A', 'B', 'C', 'D'];
 
   // ---- The running order, built from the rounds ----
-  // Each round: video scene, question, voting, closed, say it out loud, reveal, three weeks later, scores.
+  // Each round: video scene, question, voting, closed, your words, reveal, three weeks later, scores.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }];
   G.rounds.forEach(function (r, ri) {
     r.questions.forEach(function (n) {
@@ -154,7 +154,7 @@
       case 'question': return R + ': show the question';
       case 'voting': return R + ': discuss and vote';
       case 'closed': return R + ': close voting';
-      case 'rehearse': return R + ': say it out loud';
+      case 'rehearse': return R + ': your words';
       case 'reveal': return R + ': reveal and scores';
       case 'later': return R + ': three weeks later';
       case 'scoreboard': return 'Scoreboard after ' + R;
@@ -339,7 +339,7 @@
       html += '<p><span class="lbl">' + esc(G.rounds[s.round].label + ': ' + G.rounds[s.round].title) + '.</span> ' + esc(q.text) + '</p>';
       if (s.phase === 'question' || s.phase === 'voting' || s.phase === 'closed') html += '<p><span class="lbl">Say before they discuss:</span> ' + esc(q.setup) + '</p>';
       if (s.phase === 'rehearse') {
-        html += '<p><span class="lbl">Say it out loud:</span> ' + esc(q.rehearse) + '</p>';
+        html += '<p><span class="lbl">Your words:</span> ' + esc(q.rehearse) + '</p>';
         html += '<p><span class="lbl">Listen for:</span> ' + esc(q.rehearseCheck) + '</p>';
         html += '<p><span class="lbl">Bonus point:</span> click a table name on the right for the line you would want said on your site. Click again to take it off.</p>';
       }
@@ -381,7 +381,7 @@
     }).join('') : '';
   }
 
-  // Bonus point: click a table during "say it out loud", the reveal or "three weeks later".
+  // Bonus point: click a table during "your words", the reveal or "three weeks later".
   el('teamList').addEventListener('click', function (e) {
     var chip = e.target.closest('.chip'), s = STEPS[step];
     if (!chip || ['rehearse', 'reveal', 'later'].indexOf(s.phase) < 0) return;
