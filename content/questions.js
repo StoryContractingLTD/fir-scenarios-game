@@ -33,7 +33,7 @@ window.GG_GAME = {
       options: {
         A: "Catch Dan afterwards, quietly",
         B: "Ask Sophie first",
-        C: "Three seconds, in the room, aimed at the standard"
+        C: "Speak up there and then: that kind of comment isn't OK here"
       },
       answer: "C",
       scores: {
@@ -47,10 +47,10 @@ window.GG_GAME = {
         C: "\"Dan, we don't grade people's looks in briefings. Anyone. Plan's sound, let's crack on.\" Then tell Sophie it was your call, not hers."
       },
       rehearse: "As a table, agree the exact words you would say in the cabin, in under five seconds, and write them down. Then one person reads your table's line out from the paper.",
-      rehearseCheck: "Did it address the standard, or make Sophie the subject? \"We don't do that here\" passes. \"Sophie's a professional\" fails.",
+      rehearseCheck: "Was it about the comment not being OK, or did it make Sophie the subject? \"We don't do that here\" passes. \"Sophie's a professional\" fails.",
       thatDay: "Four seconds of awkwardness, then the briefing carries on. Dan says nothing about it. Neither does Sophie.",
       later: {
-        A: "No repeat from Dan, but two more remarks in the same register from others, and nothing said. Sophie has been on as-builts and paperwork for a fortnight while the apprentice got the setting-out.",
+        A: "No repeat from Dan, but two more remarks of the same kind from others, and nothing said. Sophie has been on as-builts and paperwork for a fortnight while the apprentice got the setting-out.",
         B: "The comments carry on, about one a week: Dan, and now two others. Sophie asked her engineering lead about a move to the Peterborough job. She has been on paperwork for a fortnight.",
         C: "No more comments. From anyone. And Sophie has been on as-builts and paperwork for a fortnight while the apprentice got the setting-out."
       },
@@ -66,7 +66,7 @@ window.GG_GAME = {
       options: {
         A: "Reassure him",
         B: "Direct him",
-        C: "Separate the two problems"
+        C: "Talk to Dan, and sort out Sophie's work separately"
       },
       answer: "C",
       scores: {
@@ -77,7 +77,7 @@ window.GG_GAME = {
       why: {
         A: "He is a good bloke, tell him to be himself. Kind, and it does nothing about Sophie's fortnight. It teaches him the problem was being pulled up.",
         B: "Sophie is back on setting-out from Monday. He complies, resentfully, and still has no idea where the line is.",
-        C: "Be concrete about the line, then handle work allocation as a management standard: it follows development need and competence."
+        C: "Be clear with Dan about where the line is. Then sort out Sophie's work as a separate decision: work goes to people based on what they can do and what they need to learn."
       },
       rehearse: "Read case file 1, Dan's side. He has said: \"Fine, whatever you want.\" and gone quiet. As a table, write the exact words you would say next, then one person reads them out from the paper.",
       rehearseCheck: "Does the line keep the conversation open without backing down, and without making Dan the problem? If the table lets \"fine, whatever you want\" end it, the manager has lost. Watch for tables who skip the hard part and write a line for an easy, reasonable Dan.",
@@ -97,7 +97,7 @@ window.GG_GAME = {
       options: {
         A: "Say nothing to Marcus",
         B: "Take it up the line",
-        C: "Same register as Round 1, on the day"
+        C: "Speak up there and then, the same way you did with Dan"
       },
       answer: "C",
       scores: {
@@ -106,7 +106,7 @@ window.GG_GAME = {
         C: { t: 2, s: 2, r: 1 }
       },
       why: {
-        A: "Dan has just learned the standard you enforced on him does not apply to people keeping you on schedule. Everything you built is now conditional.",
+        A: "Dan has just learned the line you held with him does not apply to people keeping you on schedule. Everything you built is now conditional.",
         B: "Correct on paper, useless on site. Slow, it takes Sophie out of a process about her, and nobody in that room saw you do anything.",
         C: "\"Marcus, Sophie's the engineer on this job. Let's keep it to that.\" Tell Sophie you have done it, and log it: date, what was said, what you did."
       },
