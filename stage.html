@@ -382,7 +382,7 @@
       if (!w.length) { el('winHead').textContent = 'Thanks for taking part'; el('winNames').textContent = ''; el('winScore').textContent = ''; el('winBand').textContent = ''; return; }
       el('winHead').textContent = w.length > 1 ? 'Our joint winners' : 'Our winning table';
       el('winNames').textContent = w.join('  &  ');
-      el('winScore').textContent = st.topScore + ' out of 15 points';
+      el('winScore').textContent = st.topScore + (st.topScore === 1 ? ' point' : ' points') + ' (15 available, plus bonus points)';
       el('winBand').textContent = st.band ? '\u201C' + st.band + '\u201D' : '';
       return;
     }
