@@ -56,6 +56,12 @@
   #stillSubs:empty { display:none; }
   #stillNext { position:absolute; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; }
   #stillNext.on { display:block; }
+  #stillAsk { position:absolute; left:50%; bottom:3cqw; transform:translateX(-50%); width:80%; background:rgba(255,255,255,.95); border-top:.6cqw solid var(--blue); border-radius:1cqw; padding:1.8cqw 2.6cqw; box-shadow:0 .6cqw 2cqw rgba(0,0,0,.35); display:none; }
+  #stillAsk.on { display:block; }
+  #stillAsk h2 { margin:0 0 1.2cqw; font-size:2.2cqw; font-weight:800; color:var(--blue); }
+  #stillAsk ol { margin:0; padding:0; list-style:none; display:flex; gap:1.4cqw; }
+  #stillAsk li { flex:1; display:flex; align-items:center; gap:1cqw; font-family:'Montserrat', Arial, sans-serif; font-size:2cqw; font-weight:800; color:var(--ink); line-height:1.2; }
+  #stillAsk li .L { flex:0 0 auto; }
 
   /* Question and voting */
   .q-top { display:flex; align-items:center; justify-content:space-between; gap:1cqw; }
@@ -182,7 +188,7 @@
     </div>
 
     <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div></section>
-    <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div></section>
+    <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div><div id="stillAsk"><h2 id="askHead"></h2><ol id="askList"></ol></div></section>
     <div id="countdown"></div>
   </div>
 
@@ -244,6 +250,7 @@
       case 'still':
         // The dialogue plays over the still, then the prompt appears.
         stopAudio();
+        if (G.parts[st.part].discuss) break;
         el('stillNext').className = '';
         play(G.parts[st.part].audio, 1, false, false, function () { el('stillNext').className = 'on'; });
         break;
@@ -273,7 +280,7 @@
     var lab = el('vidLabel');
     lab.className = ''; lab.textContent = '';
     var f = document.createElement('iframe');
-    f.src = 'https://player.vimeo.com/video/' + (vid || C.vimeoId) + '?h=' + (hash || C.vimeoHash) + '&badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
+    f.src = 'https://player.vimeo.com/video/' + (vid || C.vimeoId) + '?' + ((hash || C.vimeoHash) ? 'h=' + (hash || C.vimeoHash) + '&' : '') + 'badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
     f.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media';
     f.referrerPolicy = 'strict-origin-when-cross-origin';
     f.title = 'Scenario video';
@@ -327,8 +334,13 @@
       var p = G.parts[st.part];
       showSection('v-still');
       el('stillImg').src = IMG + p.still;
-      el('stillSubs').textContent = p.subtitles || '';
-      el('stillNext').className = 'on'; // hidden again while the dialogue plays
+      el('stillSubs').textContent = p.discuss ? '' : (p.subtitles || '');
+      el('stillNext').className = p.discuss ? '' : 'on'; // hidden again while the dialogue plays
+      el('stillAsk').className = p.discuss ? 'on' : '';
+      if (p.discuss) {
+        el('askHead').textContent = p.discuss.heading;
+        el('askList').innerHTML = p.discuss.questions.map(function (q, i) { return '<li><span class="L">' + (i + 1) + '</span>' + esc(q) + '</li>'; }).join('');
+      }
       return;
     }
     var q = G.questions[st.q], r = G.rounds[st.round];

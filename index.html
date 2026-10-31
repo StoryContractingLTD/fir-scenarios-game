@@ -132,8 +132,9 @@
   // Each round: video scene, question, voting, closed, your words, reveal, three weeks later, scores.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }];
   (G.parts || []).forEach(function (p, pi) {
-    STEPS.push({ phase: 'video', q: 0, round: -1, part: pi });
-    STEPS.push({ phase: 'still', q: 0, round: -1, part: pi });
+    // q carries the part number for the story steps, so the phones know which part is on
+    STEPS.push({ phase: 'video', q: pi, round: -1, part: pi });
+    STEPS.push({ phase: 'still', q: pi, round: -1, part: pi });
   });
   G.rounds.forEach(function (r, ri) {
     r.questions.forEach(function (n) {
@@ -155,7 +156,7 @@
     switch (s.phase) {
       case 'join': return 'Join screen';
       case 'video': return 'Start: play ' + G.parts[s.part].title;
-      case 'still': return G.parts[s.part].title + ': still and dialogue';
+      case 'still': return G.parts[s.part].title + (G.parts[s.part].discuss ? ': discussion' : ': still and dialogue');
       case 'scene': return R + ': play the scene (' + G.rounds[s.round].title + ')';
       case 'question': return R + ': show the question';
       case 'voting': return R + ': discuss and vote';
@@ -339,6 +340,7 @@
     if (s.phase === 'join') html = '<p>Tables scan the QR code and join, one phone per table. Press Next when everyone is in.</p>';
     else if (s.phase === 'scene') html = '<p>The scene is playing. Voting opens by itself when it ends.</p>' + (q.scene.branch ? '<p><span class="lbl">Two versions:</span> the big screen labels which tables each part is for.</p>' : '');
     else if (s.phase === 'video') html = '<p>' + esc(G.parts[s.part].title) + ' is playing. The still and dialogue follow by themselves.</p>';
+    else if (s.phase === 'still' && G.parts[s.part].discuss) html = '<p>The discussion questions are up. Pairs first, then open it to the group. Press Next when they have talked it through.</p><p><span class="lbl">On screen:</span> ' + esc(G.parts[s.part].discuss.questions.join('  ')) + '</p>';
     else if (s.phase === 'still') html = '<p>The still is up with the dialogue. When the big screen says "Hit next to proceed", press Next.</p><p><span class="lbl">Dialogue:</span> ' + esc(G.parts[s.part].subtitles) + '</p>';
     else if (s.phase === 'lastword') html = '<p>The last word is playing. The final scores follow by themselves.</p>';
     else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';

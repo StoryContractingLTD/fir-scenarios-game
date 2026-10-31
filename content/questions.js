@@ -10,8 +10,9 @@ window.GG_GAME = {
   title: "[Scenario title]",
 
   // ---- The story parts, played in order after you press Start ----
-  // Each part: the video plays, then the still shows with the dialogue
-  // and subtitles, then "Hit next to proceed". Next moves to the next part.
+  // Each part: the video plays, then the still shows. Either a voice with
+  // subtitles then "Hit next to proceed", or (discuss) questions for the
+  // room that stay up until you press Next.
   // still goes in assets/images, audio goes in assets/audio.
   parts: [
     {
@@ -21,8 +22,23 @@ window.GG_GAME = {
       still: "part1-still.png",
       audio: "part1-dialogue.mp3",
       subtitles: "You're seeing all of this through Jamie's eyes. Jamie is the Site Manager. From here on, you decide what he does, or whether he does anything at all. When you're ready, we'll move on."
+    },
+    {
+      title: "Part Two",
+      vimeoId: "1241838903",
+      vimeoHash: "",
+      still: "part2-still.png",
+      // A discussion still: no voice, the questions stay up until you press Next.
+      discuss: {
+        heading: "Talk it through: first in pairs, then as a group",
+        questions: [
+          "What do you know?",
+          "What are you assuming?",
+          "What matters in your response?"
+        ]
+      }
     }
-    // Part Two goes here, same layout, once the video is made.
+    // Part Three goes here, same layout.
   ],
 
   // ---- Voting rounds: switched off for now (empty list). ----
