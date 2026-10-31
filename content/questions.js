@@ -48,11 +48,10 @@ window.GG_GAME = {
   unscored: true,
 
   // The characters shown in the fallout screens (images in assets/images).
-  // CHECK: which of the two men is Dave and which is Marcus. Swap the img names if needed.
   characters: {
-    dave:   { name: "Dave",   img: "char-younger.jpg" },
+    dave:   { name: "Dave",   img: "char-dave.jpg" },
     sophie: { name: "Sophie", img: "char-sophie.jpg" },
-    marcus: { name: "Marcus", img: "char-older.jpg" }
+    marcus: { name: "Marcus", img: "char-marcus.jpg" }
   },
 
   // ---- Decisions. afterPart: which part they follow (0 = Part One, 1 = Part Two). ----
