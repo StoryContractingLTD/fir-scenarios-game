@@ -77,12 +77,16 @@ window.GG_GAME = {
       scene: { start: 0, end: 0 },
       text: "What does Jamie do?",
       setup: "",
-      // Fallout for each option: the voiceover file and who appears on screen, in order.
+      // Fallout for each option: the voiceover file, who appears on screen (in order),
+      // and spot: [seconds into the voiceover, who to spotlight]. Others dim.
       fallout: {
-        A: { audio: "d1-fallout-A.mp3", cast: ["dave", "sophie", "marcus"] },
-        B: { audio: "d1-fallout-B.mp3", cast: ["dave", "sophie", "marcus"] },
-        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"] },
-        D: { audio: "d1-fallout-D.mp3", cast: ["dave", "marcus", "sophie"] }
+        A: { audio: "d1-fallout-A.mp3", cast: ["dave", "sophie", "marcus"],
+             spot: [[0.8, ["dave"]], [7.7, ["marcus"]], [10.5, ["sophie"]], [13.1, ["dave"]]] },
+        B: { audio: "d1-fallout-B.mp3", cast: ["dave", "sophie", "marcus"],
+             spot: [[7.3, ["dave"]], [12.5, ["sophie", "marcus"]], [19.1, ["sophie"]]] },
+        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"], spot: [] },
+        D: { audio: "d1-fallout-D.mp3", cast: ["dave", "marcus", "sophie"],
+             spot: [[8.1, ["dave"]], [10.3, ["marcus"]], [13.5, ["sophie"]]] }
       },
       options: {
         A: "Say something now: \"Dave, we don't comment on people's looks in here. Right, next item.\" Then move the briefing on.",

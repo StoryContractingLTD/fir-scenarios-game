@@ -146,7 +146,13 @@
   .fo-pic { width:100%; aspect-ratio:4 / 5; border-radius:1.2cqw; overflow:hidden; border:.35cqw solid #fff; box-shadow:0 1.2cqw 3cqw rgba(0,0,0,.45); background:#ccc; }
   .fo-pic img { width:100%; height:100%; object-fit:cover; object-position:50% 0%; transform-origin:50% 1%; animation:drift 30s ease-out forwards; }
   @keyframes drift { from { transform:scale(2.0); } to { transform:scale(2.15); } }
-  .fo-name { margin-top:.8cqw; background:#fff; color:var(--blue); font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.4cqw; padding:.3cqw 1.4cqw; border-radius:99cqw; }
+  .fo-pic { transition:transform .6s cubic-bezier(.2,.9,.3,1.2), filter .6s, box-shadow .6s; }
+  .fo-name { transition:opacity .6s, transform .6s, background .6s, color .6s; }
+  .fo-card.spot .fo-pic { transform:scale(1.08); box-shadow:0 0 0 .5cqw var(--amber), 0 1.6cqw 4cqw rgba(0,0,0,.55); }
+  .fo-card.spot .fo-name { background:var(--amber); color:#3b2a00; transform:scale(1.1); }
+  .fo-card.dim .fo-pic { transform:scale(.94); filter:brightness(.5) saturate(.6); }
+  .fo-card.dim .fo-name { opacity:.45; }
+  .fo-name { margin-top:1.8cqw; background:#fff; color:var(--blue); font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.4cqw; padding:.3cqw 1.4cqw; border-radius:99cqw; }
   @keyframes castIn { from { opacity:0; transform:translateY(8cqw) scale(.9) rotate(-2deg); } to { opacity:1; transform:none; } }
   .fo-ask { position:absolute; left:50%; bottom:2.6cqw; width:84%; transform:translate(-50%, 3cqw); opacity:0; transition:transform .7s cubic-bezier(.2,.9,.3,1.1), opacity .7s; background:#fff; border-top:.6cqw solid var(--amber); border-radius:1cqw; padding:1.4cqw 2.4cqw; box-shadow:0 1cqw 3cqw rgba(0,0,0,.4); }
   .fo-ask.on { transform:translate(-50%, 0); opacity:1; }
@@ -304,10 +310,24 @@
         var fo = G.questions[st.q].fallout || {};
         var aud = fo[st.opt] && fo[st.opt].audio;
         el('foWave') && (el('foWave').className = 'fo-wave' + (aud ? ' on' : ''));
+        var spots = (fo[st.opt] && fo[st.opt].spot) || [];
+        function spotlight(who) {
+          document.querySelectorAll('#foBox .fo-card').forEach(function (c) {
+            var k = c.getAttribute('data-k');
+            c.classList.toggle('spot', !!who && who.indexOf(k) > -1);
+            c.classList.toggle('dim', !!who && who.indexOf(k) < 0);
+          });
+        }
         setTimeout(function () {
-          play(aud, 1, false, false, function () {
+          var a = play(aud, 1, false, false, function () {
+            spotlight(null);
             if (el('foWave')) el('foWave').className = 'fo-wave';
             el('foAsk').className = 'fo-ask on';
+          });
+          if (a && spots.length) a.addEventListener('timeupdate', function () {
+            var who = null;
+            spots.forEach(function (s) { if (a.currentTime >= s[0]) who = s[1]; });
+            spotlight(who);
           });
         }, 1200); // let the characters arrive first
         break;
@@ -406,7 +426,7 @@
         '<div class="fo-wave" id="foWave"><i></i><i></i><i></i><i></i><i></i></div></div>' +
         '<div class="fo-cast">' + cast.map(function (k, i) {
           var c = chars[k] || { name: k, img: '' };
-          return '<div class="fo-card" style="animation-delay:' + (0.3 + i * 0.35) + 's"><div class="fo-pic"><img src="' + IMG + esc(c.img) + '" alt=""></div><span class="fo-name">' + esc(c.name) + '</span></div>';
+          return '<div class="fo-card" data-k="' + esc(k) + '" style="animation-delay:' + (0.3 + i * 0.35) + 's"><div class="fo-pic"><img src="' + IMG + esc(c.img) + '" alt=""></div><span class="fo-name">' + esc(c.name) + '</span></div>';
         }).join('') + '</div>';
       el('foQ').textContent = fq.why[L] || '';
       el('foAsk').className = 'fo-ask on'; // hidden again while the voiceover plays
