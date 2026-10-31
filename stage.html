@@ -48,6 +48,11 @@
   #videoBox iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
   #vidLabel { position:absolute; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; z-index:6; }
   #vidLabel.on { display:block; }
+  /* Title card shown before a part's video (introCard in questions.js) */
+  #vidCard { position:absolute; inset:0; z-index:7; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 40%, #0b75c9 0%, #004e8c 55%, #00284a 100%); opacity:0; pointer-events:none; transition:opacity .7s ease; }
+  #vidCard.on { opacity:1; }
+  #vidCard p { margin:0; color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:4.2cqw; text-align:center; padding:0 8cqw; transform:translateY(2cqw); transition:transform .9s cubic-bezier(.2,.9,.3,1.1); }
+  #vidCard.on p { transform:none; }
 
   /* Still with dialogue: fills the whole screen */
   #v-still { position:absolute; inset:0; background:#000; z-index:5; }
@@ -241,7 +246,7 @@
       </section>
     </div>
 
-    <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div></section>
+    <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div><div id="vidCard"><p id="vidCardText"></p></div></section>
     <section id="v-fallout"><div id="foBox"></div><div class="fo-ask" id="foAsk"><p class="fo-eye">Talk it through</p><p id="foQ"></p></div></section>
     <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div><div id="stillAsk"><h2 id="askHead"></h2><ol id="askList"></ol></div></section>
     <div id="countdown"></div>
@@ -357,12 +362,29 @@
 
   // ---- Video: plays one section of the scenario video, then tells the control screen ----
   var player = null, videoKey = null, videoDone = false;
-  function startVideo(key, from, to, branch, labelA, labelB, vid, hash) {
+  var cardTimer = null;
+  function startVideo(key, from, to, branch, labelA, labelB, vid, hash, card) {
     if (videoKey === key) return;
     stopVideo();
     videoKey = key; videoDone = false;
     var lab = el('vidLabel');
     lab.className = ''; lab.textContent = '';
+    if (card) {
+      // Show the title card first, then start the video underneath as it fades out.
+      el('vidCardText').textContent = card;
+      el('vidCard').className = 'on';
+      cardTimer = setTimeout(function () {
+        cardTimer = null;
+        if (videoKey !== key) return;
+        el('vidCard').className = '';
+        loadVideo(key, from, to, branch, labelA, labelB, vid, hash);
+      }, 3500);
+      return;
+    }
+    loadVideo(key, from, to, branch, labelA, labelB, vid, hash);
+  }
+  function loadVideo(key, from, to, branch, labelA, labelB, vid, hash) {
+    var lab = el('vidLabel');
     var f = document.createElement('iframe');
     f.src = 'https://player.vimeo.com/video/' + (vid || C.vimeoId) + '?' + ((hash || C.vimeoHash) ? 'h=' + (hash || C.vimeoHash) + '&' : '') + 'badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
     f.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media';
@@ -390,6 +412,8 @@
   function stopVideo() {
     if (!videoKey) return;
     videoKey = null;
+    if (cardTimer) { clearTimeout(cardTimer); cardTimer = null; }
+    el('vidCard').className = '';
     try { if (player) player.unload(); } catch (e) {}
     player = null;
     el('videoBox').innerHTML = '';
@@ -404,7 +428,7 @@
   function playVideoFor(st) {
     if (st.phase === 'scene') { var sc = G.questions[st.q].scene; startVideo('scene-' + st.q, sc.start, sc.end, sc.branch, sc.labelA, sc.labelB); }
     if (st.phase === 'lastword') startVideo('lastword', G.lastWord.start, null);
-    if (st.phase === 'video') { var p = G.parts[st.part]; startVideo('part-' + st.part, 0, null, null, null, null, p.vimeoId, p.vimeoHash); }
+    if (st.phase === 'video') { var p = G.parts[st.part]; startVideo('part-' + st.part, 0, null, null, null, null, p.vimeoId, p.vimeoHash, p.introCard); }
   }
 
   function render(st) {

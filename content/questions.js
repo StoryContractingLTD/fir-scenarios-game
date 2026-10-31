@@ -25,6 +25,8 @@ window.GG_GAME = {
     },
     {
       title: "Part Two",
+      // Title card shown for a few seconds before this video starts. Delete the line to remove it.
+      introCard: "Nearing the end of the briefing",
       vimeoId: "1241838903",
       vimeoHash: "",
       still: "part2-still.png",
@@ -86,7 +88,7 @@ window.GG_GAME = {
              spot: [[1.85, ["dave"]], [5.85, null], [10.2, ["marcus"]], [12.9, ["sophie"]], [16.9, ["dave"]]] },
         B: { audio: "d1-fallout-B.mp3", cast: ["dave", "sophie", "marcus"],
              spot: [[8.2, ["dave"]], [12.45, ["sophie", "marcus"]], [20.05, ["sophie"]]] },
-        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"], spot: [] },
+        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"], spot: [[3.6, ["sophie"]]] },
         D: { audio: "d1-fallout-D.mp3", cast: ["dave", "marcus", "sophie"],
              spot: [[7.85, ["dave"]], [10.1, ["marcus"]], [13.3, ["sophie"]]] }
       },
