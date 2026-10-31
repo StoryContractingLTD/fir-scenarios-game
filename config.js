@@ -1,5 +1,5 @@
 // =====================================================================
-// FIR Scenarios Game ("Nothing In It"): settings
+// FIR Scenarios Game: settings
 // This is the only file you should need to edit by hand.
 // =====================================================================
 window.GG_CONFIG = {
@@ -12,8 +12,8 @@ window.GG_CONFIG = {
   joinUrl: "https://storycontractingltd.github.io/fir-scenarios-game/phone.html",
 
   // ---- Vimeo: the scenario video (scene times are in content/questions.js) ----
-  vimeoId: "1223951596",
-  vimeoHash: "c0e6b77135",
+  vimeoId: "",
+  vimeoHash: "",
 
   // ---- Images (in assets/images) ----
   images: {
