@@ -18,9 +18,9 @@ window.GG_GAME = {
       title: "Part One",
       vimeoId: "1241769402",
       vimeoHash: "090cc52abc",
-      still: "part1-still.jpg",
+      still: "part1-still.png",
       audio: "part1-dialogue.mp3",
-      subtitles: "[Part One dialogue text]"
+      subtitles: "You're seeing all of this through Jamie's eyes. Jamie is the Site Manager. From here on, you decide what he does, or whether he does anything at all. When you're ready, we'll move on."
     }
     // Part Two goes here, same layout, once the video is made.
   ],
