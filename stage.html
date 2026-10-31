@@ -111,6 +111,48 @@
   #winScore { font-size:2cqw; font-weight:700; margin:0 0 .6cqw; }
   #winBand { font-size:2cqw; color:var(--grey); margin:0; font-style:italic; }
 
+  /* Option title and detail */
+  .opt .ot { display:flex; flex-direction:column; gap:.2cqw; }
+  .opt .od { font-weight:400; font-size:1.55cqw; color:var(--grey); }
+
+  /* How the room voted */
+  .split { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.4cqw; flex:1; min-height:0; }
+  .sp-col { background:var(--blue-pale); border-radius:1cqw; padding:1.2cqw; display:flex; flex-direction:column; gap:.8cqw; opacity:0; animation:spIn .5s ease-out forwards; }
+  .sp-top { display:flex; align-items:center; gap:.8cqw; }
+  .sp-title { font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.5cqw; line-height:1.2; }
+  .sp-n { font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:3.4cqw; color:var(--blue); line-height:1; }
+  .sp-n small { font-size:1.2cqw; color:var(--grey); font-weight:700; margin-left:.4cqw; }
+  .sp-chips { display:flex; flex-wrap:wrap; gap:.5cqw; }
+  .sp-chip { background:#fff; border:.15cqw solid var(--blue); color:var(--blue-dark); border-radius:99cqw; padding:.35cqw .9cqw; font-family:'Montserrat', Arial, sans-serif; font-weight:700; font-size:1.2cqw; opacity:0; transform:scale(.6); animation:chipIn .35s cubic-bezier(.3,1.6,.6,1) forwards; }
+  .sp-none { font-size:1.2cqw; color:var(--grey); font-style:italic; }
+  @keyframes spIn { from { opacity:0; transform:translateY(2cqw); } to { opacity:1; transform:none; } }
+  @keyframes chipIn { to { opacity:1; transform:none; } }
+
+  /* Fallout: full screen, characters animate in, voiceover, then the question */
+  #v-fallout { position:absolute; inset:0; z-index:5; overflow:hidden; background:radial-gradient(circle at 50% 35%, #0b75c9 0%, #004e8c 50%, #00284a 100%); }
+  #v-fallout::before { content:''; position:absolute; inset:-50%; background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.07) 50%, transparent 60%); animation:sheen 9s linear infinite; }
+  @keyframes sheen { from { transform:translateX(-30%); } to { transform:translateX(30%); } }
+  .fo-head { position:absolute; top:2.4cqw; left:3cqw; right:3cqw; display:flex; align-items:center; gap:1.4cqw; animation:spIn .6s ease-out both; }
+  .fo-head .L { width:4.4cqw; height:4.4cqw; font-size:2.4cqw; background:var(--amber); color:#3b2a00; }
+  .fo-eye { font-family:'Montserrat', Arial, sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.3cqw; font-size:1.1cqw; color:#9fc6ea; margin:0 0 .2cqw; }
+  .fo-title { font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2.8cqw; color:#fff; margin:0; line-height:1.1; }
+  .fo-wave { margin-left:auto; display:flex; align-items:flex-end; gap:.35cqw; height:2.6cqw; opacity:0; transition:opacity .4s; }
+  .fo-wave.on { opacity:1; }
+  .fo-wave i { width:.5cqw; background:#9fc6ea; border-radius:.3cqw; animation:wave 1s ease-in-out infinite; }
+  .fo-wave i:nth-child(2) { animation-delay:.15s; } .fo-wave i:nth-child(3) { animation-delay:.3s; } .fo-wave i:nth-child(4) { animation-delay:.45s; } .fo-wave i:nth-child(5) { animation-delay:.6s; }
+  @keyframes wave { 0%, 100% { height:25%; } 50% { height:100%; } }
+  .fo-cast { position:absolute; top:10.5cqw; left:0; right:0; display:flex; justify-content:center; gap:3cqw; }
+  .fo-card { width:18cqw; display:flex; flex-direction:column; align-items:center; opacity:0; animation:castIn .9s cubic-bezier(.2,.9,.3,1.15) forwards; }
+  .fo-pic { width:100%; aspect-ratio:4 / 5; border-radius:1.2cqw; overflow:hidden; border:.35cqw solid #fff; box-shadow:0 1.2cqw 3cqw rgba(0,0,0,.45); background:#ccc; }
+  .fo-pic img { width:100%; height:100%; object-fit:cover; object-position:50% 0%; transform-origin:50% 1%; animation:drift 30s ease-out forwards; }
+  @keyframes drift { from { transform:scale(2.0); } to { transform:scale(2.15); } }
+  .fo-name { margin-top:.8cqw; background:#fff; color:var(--blue); font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.4cqw; padding:.3cqw 1.4cqw; border-radius:99cqw; }
+  @keyframes castIn { from { opacity:0; transform:translateY(8cqw) scale(.9) rotate(-2deg); } to { opacity:1; transform:none; } }
+  .fo-ask { position:absolute; left:50%; bottom:2.6cqw; width:84%; transform:translate(-50%, 3cqw); opacity:0; transition:transform .7s cubic-bezier(.2,.9,.3,1.1), opacity .7s; background:#fff; border-top:.6cqw solid var(--amber); border-radius:1cqw; padding:1.4cqw 2.4cqw; box-shadow:0 1cqw 3cqw rgba(0,0,0,.4); }
+  .fo-ask.on { transform:translate(-50%, 0); opacity:1; }
+  .fo-ask p { margin:0; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2.1cqw; line-height:1.3; color:var(--ink); }
+  .fo-ask .fo-eye { color:var(--blue); margin-bottom:.5cqw; }
+
   /* Countdown */
   #countdown { position:absolute; top:9.5cqw; right:3cqw; width:7cqw; height:7cqw; border-radius:50%; border:.45cqw solid var(--blue); background:#fff; display:none; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-size:3cqw; font-weight:800; color:var(--blue); }
   #countdown.on { display:flex; }
@@ -178,6 +220,12 @@
         <div class="board" id="board"></div>
       </section>
 
+      <section id="v-split">
+        <p class="eyebrow" id="spEyebrow"></p>
+        <h1 class="big-head">How the room voted</h1>
+        <div class="split" id="spGrid"></div>
+      </section>
+
       <section id="v-winner" class="center">
         <p class="eyebrow">Final scores</p>
         <h1 class="big-head" id="winHead"></h1>
@@ -188,6 +236,7 @@
     </div>
 
     <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div></section>
+    <section id="v-fallout"><div id="foBox"></div><div class="fo-ask" id="foAsk"><p class="fo-eye">Talk it through</p><p id="foQ"></p></div></section>
     <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div><div id="stillAsk"><h2 id="askHead"></h2><ol id="askList"></ol></div></section>
     <div id="countdown"></div>
   </div>
@@ -207,6 +256,8 @@
   el('startLogo').src = IMG + C.images.logo;
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pts(q, L) { var x = q.scores && q.scores[L]; return x ? x.t + x.s + x.r : 0; }
+  // "Title: detail" option text, split into its two parts
+  function optParts(t) { var m = String(t).match(/^([^:]{1,40}):\s(.+)$/); return m ? [m[1], m[2].charAt(0).toUpperCase() + m[2].slice(1)] : [String(t), '']; }
   function sign(n) { return (n > 0 ? '+' : '') + n; }
 
   // ---- Sound ----
@@ -247,6 +298,19 @@
         break;
       case 'reveal': stopAudio(); play(S.reveal, 1); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
+      case 'fallout':
+        stopAudio();
+        el('foAsk').className = 'fo-ask';
+        var fo = G.questions[st.q].fallout || {};
+        var aud = fo[st.opt] && fo[st.opt].audio;
+        el('foWave') && (el('foWave').className = 'fo-wave' + (aud ? ' on' : ''));
+        setTimeout(function () {
+          play(aud, 1, false, false, function () {
+            if (el('foWave')) el('foWave').className = 'fo-wave';
+            el('foAsk').className = 'fo-ask on';
+          });
+        }, 1200); // let the characters arrive first
+        break;
       case 'still':
         // The dialogue plays over the still, then the prompt appears.
         stopAudio();
@@ -324,11 +388,30 @@
   }
 
   function render(st) {
-    var sig = JSON.stringify([st.phase, st.q, st.part, st.joinUrl, st.teamCount, st.answered, st.counts, st.scores, st.winners, st.closeReason]);
+    var sig = JSON.stringify([st.phase, st.q, st.part, st.opt, st.byOption, st.joinUrl, st.teamCount, st.answered, st.counts, st.scores, st.winners, st.closeReason]);
     if (sig === lastSig) return;
     lastSig = sig;
     if (st.phase === 'scene' || st.phase === 'lastword' || st.phase === 'video') { showSection('v-video'); if (started) playVideoFor(st); return; }
     stopVideo();
+    var q = G.questions[st.q], r = G.rounds[st.round];
+    var roundText = r ? r.label + '  |  ' + r.title : '';
+
+    if (st.phase === 'fallout') {
+      showSection('v-fallout');
+      var fq = G.questions[st.q], L = st.opt, parts = optParts(fq.options[L]);
+      var cast = ((fq.fallout || {})[L] || {}).cast || [];
+      var chars = G.characters || {};
+      el('foBox').innerHTML =
+        '<div class="fo-head"><span class="L">' + L + '</span><div><p class="fo-eye">' + esc(roundText) + '  |  What happens next</p><p class="fo-title">' + esc(parts[0]) + '</p></div>' +
+        '<div class="fo-wave" id="foWave"><i></i><i></i><i></i><i></i><i></i></div></div>' +
+        '<div class="fo-cast">' + cast.map(function (k, i) {
+          var c = chars[k] || { name: k, img: '' };
+          return '<div class="fo-card" style="animation-delay:' + (0.3 + i * 0.35) + 's"><div class="fo-pic"><img src="' + IMG + esc(c.img) + '" alt=""></div><span class="fo-name">' + esc(c.name) + '</span></div>';
+        }).join('') + '</div>';
+      el('foQ').textContent = fq.why[L] || '';
+      el('foAsk').className = 'fo-ask on'; // hidden again while the voiceover plays
+      return;
+    }
 
     if (st.phase === 'still') {
       var p = G.parts[st.part];
@@ -344,7 +427,6 @@
       return;
     }
     var q = G.questions[st.q], r = G.rounds[st.round];
-    var roundText = r ? r.label + '  |  ' + r.title : '';
 
     if (st.phase === 'join') {
       showSection('v-join');
@@ -365,7 +447,8 @@
       pill.textContent = st.phase === 'voting' ? 'Discuss and vote' : st.phase === 'closed' ? (st.closeReason === 'votes-in' ? 'The votes are in' : "Time's up") : 'Get ready';
       el('qText').textContent = q.text;
       el('qOpts').innerHTML = Object.keys(q.options).map(function (L) {
-        return '<div class="opt"><span class="L">' + L + '</span><span>' + esc(q.options[L]) + '</span></div>';
+        var p = optParts(q.options[L]);
+        return '<div class="opt"><span class="L">' + L + '</span><span class="ot"><span>' + esc(p[0]) + '</span>' + (p[1] ? '<span class="od">' + esc(p[1]) + '</span>' : '') + '</span></div>';
       }).join('');
       el('qSetup').textContent = q.setup || '';
       el('qSetup').style.display = q.setup ? 'block' : 'none';
@@ -403,6 +486,21 @@
       var keys = Object.keys(q.later || {});
       el('ltList').innerHTML = keys.map(function (L) {
         return '<div class="lt-card"><b>If you chose ' + L + '</b>' + esc(q.later[L]) + '</div>';
+      }).join('');
+      return;
+    }
+
+    if (st.phase === 'split') {
+      showSection('v-split');
+      el('spEyebrow').textContent = roundText;
+      var bo = st.byOption || {}, d = 0;
+      el('spGrid').innerHTML = Object.keys(q.options).map(function (L, i) {
+        var names = bo[L] || [];
+        var html = '<div class="sp-col" style="animation-delay:' + (i * 0.15) + 's"><div class="sp-top"><span class="L">' + L + '</span><span class="sp-title">' + esc(optParts(q.options[L])[0]) + '</span></div>' +
+          '<div class="sp-n">' + names.length + '<small>' + (names.length === 1 ? 'table' : 'tables') + '</small></div><div class="sp-chips">' +
+          (names.length ? names.map(function (n) { d += 0.12; return '<span class="sp-chip" style="animation-delay:' + (0.6 + d) + 's">' + esc(n) + '</span>'; }).join('') : '<span class="sp-none">Nobody</span>') +
+          '</div></div>';
+        return html;
       }).join('');
       return;
     }

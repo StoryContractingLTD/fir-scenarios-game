@@ -131,21 +131,34 @@
   // ---- The running order, built from the rounds ----
   // Each round: video scene, question, voting, closed, your words, reveal, three weeks later, scores.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }];
+  function pushRound(r, ri) {
+    r.questions.forEach(function (n) {
+      var q = G.questions[n];
+      var phases = ['question', 'voting', 'closed'];
+      if (q.scene && q.scene.end) phases.unshift('scene');
+      if (q.rehearse) phases.push('rehearse');
+      if (G.unscored) {
+        phases.forEach(function (p) { STEPS.push({ phase: p, q: n, round: ri }); });
+        STEPS.push({ phase: 'split', q: n, round: ri });
+        Object.keys(q.options).forEach(function (L) { STEPS.push({ phase: 'fallout', q: n, round: ri, opt: L }); });
+        return;
+      }
+      phases.push('reveal');
+      phases.forEach(function (p) { STEPS.push({ phase: p, q: n, round: ri }); });
+      if (q.thatDay || (q.later && Object.keys(q.later).length)) STEPS.push({ phase: 'later', q: n, round: ri });
+    });
+    if (G.unscored) return;
+    var last = r.questions[r.questions.length - 1];
+    if (ri < G.rounds.length - 1) STEPS.push({ phase: 'scoreboard', q: last, round: ri });
+    else { STEPS.push({ phase: 'lastword', q: last, round: ri }); STEPS.push({ phase: 'winner', q: last, round: ri }); }
+  }
   (G.parts || []).forEach(function (p, pi) {
     // q carries the part number for the story steps, so the phones know which part is on
     STEPS.push({ phase: 'video', q: pi, round: -1, part: pi });
     STEPS.push({ phase: 'still', q: pi, round: -1, part: pi });
+    G.rounds.forEach(function (r, ri) { if (r.afterPart === pi) pushRound(r, ri); });
   });
-  G.rounds.forEach(function (r, ri) {
-    r.questions.forEach(function (n) {
-      var q = G.questions[n];
-      ['scene', 'question', 'voting', 'closed', 'rehearse', 'reveal'].forEach(function (p) { STEPS.push({ phase: p, q: n, round: ri }); });
-      if (q.thatDay || (q.later && Object.keys(q.later).length)) STEPS.push({ phase: 'later', q: n, round: ri });
-    });
-    var last = r.questions[r.questions.length - 1];
-    if (ri < G.rounds.length - 1) STEPS.push({ phase: 'scoreboard', q: last, round: ri });
-    else { STEPS.push({ phase: 'lastword', q: last, round: ri }); STEPS.push({ phase: 'winner', q: last, round: ri }); }
-  });
+  G.rounds.forEach(function (r, ri) { if (r.afterPart == null) pushRound(r, ri); });
   var TOTAL_Q = Object.keys(G.questions).length;
 
   function pts(q, L) { var x = q.scores && q.scores[L]; return x ? x.t + x.s + x.r : 0; }
@@ -155,7 +168,7 @@
     var R = s.round >= 0 ? G.rounds[s.round].label : '';
     switch (s.phase) {
       case 'join': return 'Join screen';
-      case 'video': return 'Start: play ' + G.parts[s.part].title;
+      case 'video': return (s.part === 0 ? 'Start: play ' : 'Play ') + G.parts[s.part].title;
       case 'still': return G.parts[s.part].title + (G.parts[s.part].discuss ? ': discussion' : ': still and dialogue');
       case 'scene': return R + ': play the scene (' + G.rounds[s.round].title + ')';
       case 'question': return R + ': show the question';
@@ -163,6 +176,8 @@
       case 'closed': return R + ': close voting';
       case 'rehearse': return R + ': your words';
       case 'reveal': return R + ': reveal and scores';
+      case 'split': return R + ': how the room voted';
+      case 'fallout': return R + ': what happens with ' + s.opt;
       case 'later': return R + ': three weeks later';
       case 'scoreboard': return 'Scoreboard after ' + R;
       case 'lastword': return "Last word (video)";
@@ -205,6 +220,15 @@
       .sort(function (a, b) { return b.score - a.score || a.name.localeCompare(b.name); });
   }
 
+  // Table names per option, for "how the room voted"
+  function byOption(qn) {
+    var names = {}, out = { A: [], B: [], C: [], D: [] };
+    teams.forEach(function (t) { names[t.id] = t.name; });
+    votes.forEach(function (v) { if (v.q === qn && names[v.team_id] && out[v.choice]) out[v.choice].push(names[v.team_id]); });
+    Object.keys(out).forEach(function (k) { out[k].sort(); });
+    return out;
+  }
+
   // ---- What the big screen needs ----
   function stageState() {
     var s = STEPS[step];
@@ -214,7 +238,8 @@
     var scores = scoreTable();
     var top = scores.length ? scores[0].score : 0;
     return {
-      phase: s.phase, q: s.q, round: s.round, part: s.part, total: TOTAL_Q,
+      phase: s.phase, q: s.q, round: s.round, part: s.part, opt: s.opt, total: TOTAL_Q,
+      byOption: byOption(s.q),
       joinUrl: C.joinUrl, teamCount: teams.length,
       answered: qVotes.length, counts: counts,
       scores: scores,
@@ -342,19 +367,22 @@
     else if (s.phase === 'video') html = '<p>' + esc(G.parts[s.part].title) + ' is playing. The still and dialogue follow by themselves.</p>';
     else if (s.phase === 'still' && G.parts[s.part].discuss) html = '<p>The discussion questions are up. Pairs first, then open it to the group. Press Next when they have talked it through.</p><p><span class="lbl">On screen:</span> ' + esc(G.parts[s.part].discuss.questions.join('  ')) + '</p>';
     else if (s.phase === 'still') html = '<p>The still is up with the dialogue. When the big screen says "Hit next to proceed", press Next.</p><p><span class="lbl">Dialogue:</span> ' + esc(G.parts[s.part].subtitles) + '</p>';
+    else if (s.phase === 'split') html = '<p>How the room voted, by table. Ask a table or two why they chose what they did. Next plays the fallout for A.</p>' + (q.note ? '<p><span class="lbl">Pointers:</span> ' + esc(q.note) + '</p>' : '');
+    else if (s.phase === 'fallout') html = '<p><span class="lbl">' + s.opt + '. ' + esc(q.options[s.opt]) + '</span></p><p>The voiceover plays, then the discussion question appears.</p><p><span class="lbl">On screen:</span> ' + esc(q.why[s.opt]) + '</p>' + (q.notes && q.notes[s.opt] ? '<p><span class="lbl">Notes:</span> ' + esc(q.notes[s.opt]) + '</p>' : '') + '<p><span class="lbl">Voiceover:</span> ' + esc(q.later[s.opt]) + '</p>';
     else if (s.phase === 'lastword') html = '<p>The last word is playing. The final scores follow by themselves.</p>';
     else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';
     else if (s.phase === 'winner') html = '<p>Final scores and the winner are on the big screen.</p>';
     else {
       html += '<p><span class="lbl">' + esc(G.rounds[s.round].label + ': ' + G.rounds[s.round].title) + '.</span> ' + esc(q.text) + '</p>';
-      if (s.phase === 'question' || s.phase === 'voting' || s.phase === 'closed') html += '<p><span class="lbl">Say before they discuss:</span> ' + esc(q.setup) + '</p>';
+      if ((s.phase === 'question' || s.phase === 'voting' || s.phase === 'closed') && q.setup) html += '<p><span class="lbl">Say before they discuss:</span> ' + esc(q.setup) + '</p>';
       if (s.phase === 'rehearse') {
         html += '<p><span class="lbl">Your words:</span> ' + esc(q.rehearse) + '</p>';
         html += '<p><span class="lbl">Listen for:</span> ' + esc(q.rehearseCheck) + '</p>';
         html += '<p><span class="lbl">Bonus point:</span> click a table name on the right for the line you would want said on your site. Click again to take it off.</p>';
       }
       Object.keys(q.options).forEach(function (L) {
-        html += '<p' + (L === q.answer ? ' class="ans"' : '') + '>' + L + '. ' + esc(q.options[L]) + ' (' + (pts(q, L) > 0 ? '+' : '') + pts(q, L) + ')' + (L === q.answer ? ', strongest' : '') + '</p>';
+        if (G.unscored) html += '<p>' + L + '. ' + esc(q.options[L]) + '</p>';
+        else html += '<p' + (L === q.answer ? ' class="ans"' : '') + '>' + L + '. ' + esc(q.options[L]) + ' (' + (pts(q, L) > 0 ? '+' : '') + pts(q, L) + ')' + (L === q.answer ? ', strongest' : '') + '</p>';
       });
       if (q.note) html += '<p><span class="lbl">Note:</span> ' + esc(q.note) + '</p>';
     }
@@ -365,7 +393,7 @@
 
   function renderLive() {
     var s = STEPS[step];
-    var showQ = ['voting', 'closed', 'reveal'].indexOf(s.phase) > -1;
+    var showQ = ['voting', 'closed', 'reveal', 'split', 'fallout'].indexOf(s.phase) > -1;
     var answeredIds = {};
     votes.forEach(function (v) { if (v.q === s.q) answeredIds[v.team_id] = v.choice; });
     el('teamCount').textContent = '(' + teams.length + ')';

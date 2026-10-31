@@ -44,7 +44,21 @@ window.GG_GAME = {
   // ---- Voting rounds: switched off for now (empty list). ----
   // To switch them back on, put the three rounds back in:
   // { label: "Round 1", title: "[Round 1 title]", questions: [1] }, and so on.
-  rounds: [],
+  // Unscored: no points, no scoreboard, no winner. All options stay open.
+  unscored: true,
+
+  // The characters shown in the fallout screens (images in assets/images).
+  // CHECK: which of the two men is Dave and which is Marcus. Swap the img names if needed.
+  characters: {
+    dave:   { name: "Dave",   img: "char-younger.jpg" },
+    sophie: { name: "Sophie", img: "char-sophie.jpg" },
+    marcus: { name: "Marcus", img: "char-older.jpg" }
+  },
+
+  // ---- Decisions. afterPart: which part they follow (0 = Part One, 1 = Part Two). ----
+  rounds: [
+    { label: "Decision 1", title: "The briefing", afterPart: 1, questions: [1] }
+  ],
 
   // The last word, played after Round 3, to the end of the video.
   lastWord: { start: 0 },
@@ -62,8 +76,15 @@ window.GG_GAME = {
   questions: {
     1: {
       scene: { start: 0, end: 0 },
-      text: "[Round 1 question]",
-      setup: "[What the facilitator says before tables discuss]",
+      text: "What does Jamie do?",
+      setup: "",
+      // Fallout for each option: the voiceover file and who appears on screen, in order.
+      fallout: {
+        A: { audio: "d1-fallout-A.mp3", cast: ["dave", "sophie", "marcus"] },
+        B: { audio: "d1-fallout-B.mp3", cast: ["dave", "sophie", "marcus"] },
+        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"] },
+        D: { audio: "d1-fallout-D.mp3", cast: ["dave", "marcus", "sophie"] }
+      },
       options: {
         A: "Say something now: \"Dave, we don't comment on people's looks in here. Right, next item.\" Then move the briefing on.",
         B: "Have a quiet word afterwards: let the briefing finish, then speak privately to Dave about keeping comments on people's looks out of briefings.",
