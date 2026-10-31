@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nothing In It</title>
+<title>Scenarios Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -119,7 +119,7 @@
       <section id="v-join">
         <div class="join-left">
           <p class="eyebrow">Scenario activity</p>
-          <h1 class="game-title">Nothing In It</h1>
+          <h1 class="game-title" id="gameTitle"></h1>
           <p class="muted game-sub">Watch the scene. Talk it through as a table. Choose what you would do, then write the words you would use.</p>
         </div>
         <div class="join-right">
@@ -185,6 +185,7 @@
 
 <script>
   var C = window.GG_CONFIG, G = window.GG_GAME, S = C.sounds;
+  document.getElementById('gameTitle').textContent = G.title;
   var IMG = 'assets/images/', AUD = 'assets/audio/';
   var el = function (id) { return document.getElementById(id); };
   el('barLogo').src = IMG + C.images.logo;
