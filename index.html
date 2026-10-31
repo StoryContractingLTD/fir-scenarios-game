@@ -131,6 +131,10 @@
   // ---- The running order, built from the rounds ----
   // Each round: video scene, question, voting, closed, your words, reveal, three weeks later, scores.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }];
+  (G.parts || []).forEach(function (p, pi) {
+    STEPS.push({ phase: 'video', q: 0, round: -1, part: pi });
+    STEPS.push({ phase: 'still', q: 0, round: -1, part: pi });
+  });
   G.rounds.forEach(function (r, ri) {
     r.questions.forEach(function (n) {
       var q = G.questions[n];
@@ -150,6 +154,8 @@
     var R = s.round >= 0 ? G.rounds[s.round].label : '';
     switch (s.phase) {
       case 'join': return 'Join screen';
+      case 'video': return 'Start: play ' + G.parts[s.part].title;
+      case 'still': return G.parts[s.part].title + ': still and dialogue';
       case 'scene': return R + ': play the scene (' + G.rounds[s.round].title + ')';
       case 'question': return R + ': show the question';
       case 'voting': return R + ': discuss and vote';
@@ -207,7 +213,7 @@
     var scores = scoreTable();
     var top = scores.length ? scores[0].score : 0;
     return {
-      phase: s.phase, q: s.q, round: s.round, total: TOTAL_Q,
+      phase: s.phase, q: s.q, round: s.round, part: s.part, total: TOTAL_Q,
       joinUrl: C.joinUrl, teamCount: teams.length,
       answered: qVotes.length, counts: counts,
       scores: scores,
@@ -228,7 +234,7 @@
   window.addEventListener('message', function (e) {
     var m = e.data || {};
     if (m.type === 'stage-ready') { if (!stageWin && e.source) stageWin = e.source; sendToStage(); }
-    if (m.type === 'video-ended' && (STEPS[step].phase === 'scene' || STEPS[step].phase === 'lastword')) goTo(step + 1);
+    if (m.type === 'video-ended' && (STEPS[step].phase === 'scene' || STEPS[step].phase === 'lastword' || STEPS[step].phase === 'video')) goTo(step + 1);
     // Max has finished reading the question: open voting.
     if (m.type === 'question-done' && STEPS[step].phase === 'question' && m.q === STEPS[step].q) goTo(step + 1);
     // "The votes are in" or "Time's up" has finished: reveal.
@@ -332,6 +338,8 @@
     var q = G.questions[s.q];
     if (s.phase === 'join') html = '<p>Tables scan the QR code and join, one phone per table. Press Next when everyone is in.</p>';
     else if (s.phase === 'scene') html = '<p>The scene is playing. Voting opens by itself when it ends.</p>' + (q.scene.branch ? '<p><span class="lbl">Two versions:</span> the big screen labels which tables each part is for.</p>' : '');
+    else if (s.phase === 'video') html = '<p>' + esc(G.parts[s.part].title) + ' is playing. The still and dialogue follow by themselves.</p>';
+    else if (s.phase === 'still') html = '<p>The still is up with the dialogue. When the big screen says "Hit next to proceed", press Next.</p><p><span class="lbl">Dialogue:</span> ' + esc(G.parts[s.part].subtitles) + '</p>';
     else if (s.phase === 'lastword') html = '<p>The last word is playing. The final scores follow by themselves.</p>';
     else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';
     else if (s.phase === 'winner') html = '<p>Final scores and the winner are on the big screen.</p>';

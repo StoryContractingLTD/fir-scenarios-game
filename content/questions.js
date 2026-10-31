@@ -9,11 +9,26 @@
 window.GG_GAME = {
   title: "[Scenario title]",
 
-  rounds: [
-    { label: "Round 1", title: "[Round 1 title]", questions: [1] },
-    { label: "Round 2", title: "[Round 2 title]", questions: [2] },
-    { label: "Round 3", title: "[Round 3 title]", questions: [3] }
+  // ---- The story parts, played in order after you press Start ----
+  // Each part: the video plays, then the still shows with the dialogue
+  // and subtitles, then "Hit next to proceed". Next moves to the next part.
+  // still goes in assets/images, audio goes in assets/audio.
+  parts: [
+    {
+      title: "Part One",
+      vimeoId: "1241769402",
+      vimeoHash: "090cc52abc",
+      still: "part1-still.jpg",
+      audio: "part1-dialogue.mp3",
+      subtitles: "[Part One dialogue text]"
+    }
+    // Part Two goes here, same layout, once the video is made.
   ],
+
+  // ---- Voting rounds: switched off for now (empty list). ----
+  // To switch them back on, put the three rounds back in:
+  // { label: "Round 1", title: "[Round 1 title]", questions: [1] }, and so on.
+  rounds: [],
 
   // The last word, played after Round 3, to the end of the video.
   lastWord: { start: 0 },

@@ -49,6 +49,14 @@
   #vidLabel { position:absolute; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; z-index:6; }
   #vidLabel.on { display:block; }
 
+  /* Still with dialogue: fills the whole screen */
+  #v-still { position:absolute; inset:0; background:#000; z-index:5; }
+  #stillImg { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+  #stillSubs { position:absolute; left:50%; bottom:4cqw; transform:translateX(-50%); width:84%; text-align:center; color:#fff; background:rgba(0,0,0,.72); font-size:2.2cqw; line-height:1.4; font-weight:700; padding:1cqw 2cqw; border-radius:.8cqw; }
+  #stillSubs:empty { display:none; }
+  #stillNext { position:absolute; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; }
+  #stillNext.on { display:block; }
+
   /* Question and voting */
   .q-top { display:flex; align-items:center; justify-content:space-between; gap:1cqw; }
   .pill { font-size:1.15cqw; font-weight:800; text-transform:uppercase; letter-spacing:.15cqw; padding:.5cqw 1.3cqw; border-radius:99cqw; background:var(--line); color:var(--grey); margin-right:9cqw; }
@@ -174,6 +182,7 @@
     </div>
 
     <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div></section>
+    <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div></section>
     <div id="countdown"></div>
   </div>
 
@@ -232,6 +241,12 @@
         break;
       case 'reveal': stopAudio(); play(S.reveal, 1); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
+      case 'still':
+        // The dialogue plays over the still, then the prompt appears.
+        stopAudio();
+        el('stillNext').className = '';
+        play(G.parts[st.part].audio, 1, false, false, function () { el('stillNext').className = 'on'; });
+        break;
       default: stopAudio();
     }
   }
@@ -251,14 +266,14 @@
 
   // ---- Video: plays one section of the scenario video, then tells the control screen ----
   var player = null, videoKey = null, videoDone = false;
-  function startVideo(key, from, to, branch, labelA, labelB) {
+  function startVideo(key, from, to, branch, labelA, labelB, vid, hash) {
     if (videoKey === key) return;
     stopVideo();
     videoKey = key; videoDone = false;
     var lab = el('vidLabel');
     lab.className = ''; lab.textContent = '';
     var f = document.createElement('iframe');
-    f.src = 'https://player.vimeo.com/video/' + C.vimeoId + '?h=' + C.vimeoHash + '&badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
+    f.src = 'https://player.vimeo.com/video/' + (vid || C.vimeoId) + '?h=' + (hash || C.vimeoHash) + '&badge=0&autopause=0&autoplay=1&title=0&byline=0&portrait=0&app_id=58479#t=' + from + 's';
     f.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media';
     f.referrerPolicy = 'strict-origin-when-cross-origin';
     f.title = 'Scenario video';
@@ -298,14 +313,24 @@
   function playVideoFor(st) {
     if (st.phase === 'scene') { var sc = G.questions[st.q].scene; startVideo('scene-' + st.q, sc.start, sc.end, sc.branch, sc.labelA, sc.labelB); }
     if (st.phase === 'lastword') startVideo('lastword', G.lastWord.start, null);
+    if (st.phase === 'video') { var p = G.parts[st.part]; startVideo('part-' + st.part, 0, null, null, null, null, p.vimeoId, p.vimeoHash); }
   }
 
   function render(st) {
-    var sig = JSON.stringify([st.phase, st.q, st.joinUrl, st.teamCount, st.answered, st.counts, st.scores, st.winners, st.closeReason]);
+    var sig = JSON.stringify([st.phase, st.q, st.part, st.joinUrl, st.teamCount, st.answered, st.counts, st.scores, st.winners, st.closeReason]);
     if (sig === lastSig) return;
     lastSig = sig;
-    if (st.phase === 'scene' || st.phase === 'lastword') { showSection('v-video'); if (started) playVideoFor(st); return; }
+    if (st.phase === 'scene' || st.phase === 'lastword' || st.phase === 'video') { showSection('v-video'); if (started) playVideoFor(st); return; }
     stopVideo();
+
+    if (st.phase === 'still') {
+      var p = G.parts[st.part];
+      showSection('v-still');
+      el('stillImg').src = IMG + p.still;
+      el('stillSubs').textContent = p.subtitles || '';
+      el('stillNext').className = 'on'; // hidden again while the dialogue plays
+      return;
+    }
     var q = G.questions[st.q], r = G.rounds[st.round];
     var roundText = r ? r.label + '  |  ' + r.title : '';
 
