@@ -63,7 +63,7 @@ window.GG_GAME = {
       text: "[Round 1 question]",
       setup: "[What the facilitator says before tables discuss]",
       options: {
-        A: "Say something now: \"Dave, keep it to the work, mate. Right, next item.\" Then move the briefing on.",
+        A: "Say something now: \"Dave, we don't comment on people's looks in here. Right, next item.\" Then move the briefing on.",
         B: "Have a quiet word afterwards: let the briefing finish, then speak privately to Dave about keeping comments on people's looks out of briefings.",
         C: "Check in with Sophie first: speak to her privately before deciding whether to raise it with Dave. Ask how the exchange landed for her.",
         D: "Leave it: she laughed, Dave meant it as a compliment, and the briefing moves on."
@@ -85,7 +85,7 @@ window.GG_GAME = {
       rehearseCheck: "[What the facilitator listens for]",
       thatDay: "",
       later: { A: "[Three weeks later after A]", B: "[After B]", C: "[After C]", D: "[After D]" },
-      note: "[Facilitator note: expect tables to say A, then a word with Sophie afterwards]"
+      note: "Facilitator only, not shown to the room. Strongest: A. The remark was public and witnessed, so the response needs to be public too. It names the standard, not Sophie, so she is not made the subject and does not have to carry it. Then a quiet word with Sophie afterwards: it was your call, not hers. B: the right message, but everyone saw the remark land and saw nothing happen. C: checking in is good practice; doing it first makes action depend on her, the person with least power in the room. If a table says she laughed: what else was she going to do, in front of everyone? D: tells the whole room, Dave included, that this is fine here. Expect tables to argue for A and C together. Agree, and point out that the order matters."
     },
 
     2: {
