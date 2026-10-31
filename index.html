@@ -325,10 +325,26 @@
   }, 250);
   setInterval(function () { if (STEPS[step].phase === 'voting') poll(); }, 1000);
 
+  // Fallouts: Next only plays the options tables actually chose (all of them if nobody voted).
+  function voteCount(qn, L) { return votes.filter(function (v) { return v.q === qn && v.choice === L; }).length; }
+  function skipFallout(j) {
+    var s = STEPS[j];
+    if (!s || s.phase !== 'fallout') return false;
+    var any = votes.some(function (v) { return v.q === s.q; });
+    return any && voteCount(s.q, s.opt) === 0;
+  }
+  function nextIndex(i) { var j = i + 1; while (skipFallout(j)) j++; return j; }
+  function prevIndex(i) { var j = i - 1; while (j > 0 && skipFallout(j)) j--; return j; }
+
   el('nextBtn').addEventListener('click', function () {
-    if (STEPS[step].phase === 'voting') endVoting(); else goTo(step + 1);
+    if (STEPS[step].phase === 'voting') endVoting(); else goTo(nextIndex(step));
   });
-  el('backBtn').addEventListener('click', function () { goTo(step - 1); });
+  el('backBtn').addEventListener('click', function () { goTo(prevIndex(step)); });
+  // Play any option's fallout on demand, chosen or not.
+  el('nowBox').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) goTo(parseInt(b.getAttribute('data-goto'), 10));
+  });
   el('jumpSel').addEventListener('change', function () { goTo(parseInt(this.value, 10)); });
   // Music on/off: mutes the music straight away on the big screen. Max and the sound effects carry on.
   el('musicBtn').addEventListener('click', function () {
@@ -348,7 +364,7 @@
 
   // ---- Director display ----
   function renderControls() {
-    var s = STEPS[step], nxt = STEPS[step + 1];
+    var s = STEPS[step], nxt = STEPS[nextIndex(step)];
     el('nextBtn').textContent = nxt ? 'Next: ' + label(nxt) : 'End of the show';
     el('nextBtn').disabled = busy || !nxt;
     el('backBtn').disabled = busy || step === 0;
@@ -367,7 +383,7 @@
     else if (s.phase === 'video') html = '<p>' + esc(G.parts[s.part].title) + ' is playing. The still and dialogue follow by themselves.</p>';
     else if (s.phase === 'still' && G.parts[s.part].discuss) html = '<p>The discussion questions are up. Pairs first, then open it to the group. Press Next when they have talked it through.</p><p><span class="lbl">On screen:</span> ' + esc(G.parts[s.part].discuss.questions.join('  ')) + '</p>';
     else if (s.phase === 'still') html = '<p>The still is up with the dialogue. When the big screen says "Hit next to proceed", press Next.</p><p><span class="lbl">Dialogue:</span> ' + esc(G.parts[s.part].subtitles) + '</p>';
-    else if (s.phase === 'split') html = '<p>How the room voted, by table. Ask a table or two why they chose what they did. Next plays the fallout for A.</p>' + (q.note ? '<p><span class="lbl">Pointers:</span> ' + esc(q.note) + '</p>' : '');
+    else if (s.phase === 'split') html = '<p>How the room voted, by table. Ask a table or two why they chose what they did.</p>' + (q.note ? '<p><span class="lbl">Pointers:</span> ' + esc(q.note) + '</p>' : '');
     else if (s.phase === 'fallout') html = '<p><span class="lbl">' + s.opt + '. ' + esc(q.options[s.opt]) + '</span></p><p>The voiceover plays, then the discussion question appears.</p><p><span class="lbl">On screen:</span> ' + esc(q.why[s.opt]) + '</p>' + (q.notes && q.notes[s.opt] ? '<p><span class="lbl">Notes:</span> ' + esc(q.notes[s.opt]) + '</p>' : '') + '<p><span class="lbl">Voiceover:</span> ' + esc(q.later[s.opt]) + '</p>';
     else if (s.phase === 'lastword') html = '<p>The last word is playing. The final scores follow by themselves.</p>';
     else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';
@@ -385,6 +401,16 @@
         else html += '<p' + (L === q.answer ? ' class="ans"' : '') + '>' + L + '. ' + esc(q.options[L]) + ' (' + (pts(q, L) > 0 ? '+' : '') + pts(q, L) + ')' + (L === q.answer ? ', strongest' : '') + '</p>';
       });
       if (q.note) html += '<p><span class="lbl">Note:</span> ' + esc(q.note) + '</p>';
+    }
+    if (s.phase === 'split' || s.phase === 'fallout') {
+      html += '<p><span class="lbl">Fallouts:</span> Next plays the ones tables chose. Click any to play it now.</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">';
+      STEPS.forEach(function (f, i) {
+        if (f.phase !== 'fallout' || f.q !== s.q) return;
+        var n = voteCount(f.q, f.opt), now = i === step;
+        html += '<button type="button" class="btn' + (n ? '' : ' ghost') + '" data-goto="' + i + '" style="padding:8px 12px;font-size:13px;' + (now ? 'outline:3px solid #f2a900;' : '') + '">' +
+          f.opt + ': ' + (n ? n + (n === 1 ? ' table' : ' tables') : 'nobody, play anyway') + '</button>';
+      });
+      html += '</div>';
     }
     el('nowBox').innerHTML = html;
     renderControls();
