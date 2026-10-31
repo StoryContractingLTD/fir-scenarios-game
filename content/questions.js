@@ -62,19 +62,30 @@ window.GG_GAME = {
       scene: { start: 0, end: 0 },
       text: "[Round 1 question]",
       setup: "[What the facilitator says before tables discuss]",
-      options: { A: "[Option A]", B: "[Option B]", C: "[Option C]" },
-      answer: "C",
+      options: {
+        A: "Say something now: \"Dave, keep it to the work, mate. Right, next item.\" Then move the briefing on.",
+        B: "Have a quiet word afterwards: let the briefing finish, then speak privately to Dave about keeping comments on people's looks out of briefings.",
+        C: "Check in with Sophie first: speak to her privately before deciding whether to raise it with Dave. Ask how the exchange landed for her.",
+        D: "Leave it: she laughed, Dave meant it as a compliment, and the briefing moves on."
+      },
+      answer: "A",
       scores: {
         A: { t: 0, s: 0, r: 0 },
         B: { t: 0, s: 0, r: 0 },
-        C: { t: 0, s: 0, r: 0 }
+        C: { t: 0, s: 0, r: 0 },
+        D: { t: 0, s: 0, r: 0 }
       },
-      why: { A: "[Why A]", B: "[Why B]", C: "[Why C]" },
+      why: {
+        A: "[Why A]",
+        B: "[Why B]",
+        C: "[Why C: the problem is checking in first, so action depends on her, not checking in at all]",
+        D: "[Why D]"
+      },
       rehearse: "[Your words instruction]",
       rehearseCheck: "[What the facilitator listens for]",
       thatDay: "",
-      later: { A: "[Three weeks later after A]", B: "[After B]", C: "[After C]" },
-      note: "[Facilitator note]"
+      later: { A: "[Three weeks later after A]", B: "[After B]", C: "[After C]", D: "[After D]" },
+      note: "[Facilitator note: expect tables to say A, then a word with Sophie afterwards]"
     },
 
     2: {
