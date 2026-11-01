@@ -171,15 +171,15 @@ window.GG_GAME = {
              spot: [[0.7, ["dave"]], [6.6, ["sophie"]], [8.7, ["dave", "sophie"]], [14.5, ["dave"]], [16.6, ["sophie"]]] },
         B: { audio: "d2-fallout-B.mp3", cast: ["jamie", "dave", "sophie"],
              spot: [[0.75, ["dave"]], [3.85, ["sophie"]], [8.9, ["jamie"]], [12.75, ["dave"]], [17.9, ["sophie"]]] },
-        C: { audio: "d2-fallout-C.mp3", cast: ["jamie", "dave", "sophie"],
-             spot: [[0.7, ["jamie"]], [1.6, ["dave", "sophie"]], [4.85, ["dave"]], [7.9, ["sophie"]], [10.75, ["dave", "sophie"]], [14.85, ["sophie", "jamie"]], [17.0, ["sophie"]]] },
+        // C voiceover still to record; spotlights get timed once it's in.
+        C: { audio: "d2-fallout-C.mp3", cast: ["jamie", "dave", "sophie"], spot: [] },
         D: { audio: "d2-fallout-D.mp3", cast: ["jamie", "dave", "sophie"],
              spot: [[0.75, ["jamie"]], [4.35, ["dave"]], [8.65, ["sophie"]]] }
       },
       options: {
         "A": "Clear up the misunderstanding: \"You can still have a laugh with her, Dave. I asked you to leave her looks out of it, not leave her out of the job.\"",
         "B": "Give a clear instruction: \"From today, Sophie sees setting-out changes before they go to the crew. I'll check the next handover.\"",
-        "C": "Get them both together: sit Dave and Sophie down to clear the air and agree how they'll work together.",
+        "C": "Hear him out, then agree a way forward: make time to talk it through with Dave in person. \"I didn't ask you to stop working with her, Dave. What's making it awkward? Let's sort out how she's kept in the loop, and I'll check back next week.\"",
         "D": "Give it time: Dave's clearly trying. Leave it a couple of weeks and see if it settles."
       },
       answer: "",
@@ -192,7 +192,7 @@ window.GG_GAME = {
       why: {
         "A": "What would you check to find out whether the work has changed, as well as the mood?",
         "B": "What has this fixed, and what would tell you Sophie is included beyond the handover you checked?",
-        "C": "Whose problem was this meeting solving? What could Jamie have handled himself?",
+        "C": "What made the difference here, and what would Jamie keep an eye on?",
         "D": "If it settles like this, has it settled? What is Jamie's job here?"
       },
       rehearse: "",
@@ -201,16 +201,16 @@ window.GG_GAME = {
       later: {
         "A": "Dave relaxes. \"Right. Fair enough.\" He starts talking to Sophie normally again. They chat in the cabin, and things feel easier between them. When the next setting-out change comes through, Dave passes it straight to the crew. Sophie hears about it afterwards.",
         "B": "Dave agrees. At the next handover, Sophie sees the setting-out changes before they go to the crew. Jamie checks, and she has the information she needs. Later, Dave and the crew talk through the next job. He listens to their suggestions, but he still doesn't ask Sophie what she thinks.",
-        "C": "Jamie brings Dave and Sophie together. Dave says he feels he can't say anything right. Sophie tells him she knows he means well. They talk, and things become a little easier between them. Afterwards, Sophie catches Jamie on his own. \"I just need the drawings on time,\" she says.",
+        "C": "Dave admits he doesn't know where the line is any more. Jamie tells him straight: have a laugh, just leave her looks out of it, and keep her in the loop. They agree Sophie sees setting-out changes first. A week later, Jamie checks in with both of them. Dave's still a bit careful, but Sophie's back in the conversations, and the work's better for it.",
         "D": "Jamie leaves it for a couple of weeks. Dave keeps his distance, and the changes still go to the crew first. Sophie asks for updates, then asks again. As the days pass, she stops asking. The others carry on discussing the changes without her."
       },
       notes: {
         "A": "Quick and friendly, and it fixes the misunderstanding. But no working expectation was set and nothing was checked, so the habit carries on. The mood has changed; the work hasn't.",
         "B": "The operational improvement is real: don't dismiss it as box-ticking. What's left is the relationship. Listen for what Jamie could check beyond the one handover.",
-        "C": "This deliberately echoes the trap in Decision 1 option C: responsibility drifts onto Sophie, who ends up managing Dave's discomfort. Jamie could have handled the expectation himself.",
+        "C": "The strongest response: Jamie takes Dave's worry seriously, is clear where the line is, sets the working expectation and checks it has held. Not perfect: Dave is still a bit careful. If a table suggests sitting Dave and Sophie down together, ask: whose problem would that meeting be solving, and who ends up doing the work of making Dave comfortable?",
         "D": "Feels kind to Dave, and nothing formal is needed. But a pattern of exclusion is now settling in, and Sophie has stopped asking. Silence is still a decision."
       },
-      note: "Facilitator only, not shown to the room. The strongest response combines A and B: clear up the misunderstanding, set the working expectation, and review it. Let the room build that answer itself rather than presenting it. Clear expectations do not need to wait for Dave to feel comfortable. If Dave agrees but keeps leaving Sophie out, that needs further management action through Story's verified routes; do not invent policy steps."
+      note: "Facilitator only, not shown to the room. The strongest response is C: clear up the misunderstanding, set the working expectation, and check it has held. A, B and D are not wrong so much as incomplete; use them to ask what each one is missing. Clear expectations do not need to wait for Dave to feel comfortable. If Dave agrees but keeps leaving Sophie out, that needs further management action through Story's verified routes; do not invent policy steps."
     }
   }
 };
