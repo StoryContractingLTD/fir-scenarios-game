@@ -39,8 +39,16 @@ window.GG_GAME = {
           "What matters in your response?"
         ]
       }
+    },
+    {
+      title: "Part Three",
+      vimeoId: "1242039465",
+      vimeoHash: "7c993e0642",
+      still: "part3-still.png",
+      audio: "part3-question.mp3",
+      subtitles: "Dave believes he is doing what Jamie asked. Sophie is now missing information she needs for her work. What does Jamie do next?"
     }
-    // Part Three goes here, same layout.
+    // Sophie's closing film goes here, once it's made.
   ],
 
   // ---- Voting rounds: switched off for now (empty list). ----
@@ -73,7 +81,8 @@ window.GG_GAME = {
         ],
         spot: [[4.4, ["dave"]], [7.2, ["sophie"]], [10.3, ["dave"]], [13.9, ["sophie"]], [16.4, ["dave"]]]
       }
-    }
+    },
+    { label: "Decision 2", title: "A quiet word with Dave", afterPart: 2, questions: [2] }
   ],
 
   // The last word, played after Round 3, to the end of the video.
@@ -150,40 +159,52 @@ window.GG_GAME = {
 
     2: {
       scene: { start: 0, end: 0 },
-      text: "[Round 2 question]",
-      setup: "[What the facilitator says before tables discuss]",
-      options: { A: "[Option A]", B: "[Option B]", C: "[Option C]" },
-      answer: "C",
+      text: "What does Jamie do next?",
+      setup: "",
+      // Background image behind the question and the room split
+      bg: "part3-still.png",
+      // Fallout voiceovers to record: d2-fallout-A.mp3 to D. Spot timings get set once recorded.
+      fallout: {
+        A: { audio: "d2-fallout-A.mp3", cast: ["dave", "sophie"], spot: [] },
+        B: { audio: "d2-fallout-B.mp3", cast: ["dave", "sophie"], spot: [] },
+        C: { audio: "d2-fallout-C.mp3", cast: ["dave", "sophie"], spot: [] },
+        D: { audio: "d2-fallout-D.mp3", cast: ["dave", "sophie"], spot: [] }
+      },
+      options: {
+        "A": "Clear up the misunderstanding: \"You can still have a laugh with her, Dave. I asked you to leave her looks out of it, not leave her out of the job.\"",
+        "B": "Give a clear instruction: \"From today, Sophie sees setting-out changes before they go to the crew. I'll check the next handover.\"",
+        "C": "Get them both together: sit Dave and Sophie down to clear the air and agree how they'll work together.",
+        "D": "Give it time: Dave's clearly trying. Leave it a couple of weeks and see if it settles."
+      },
+      answer: "",
       scores: {
         A: { t: 0, s: 0, r: 0 },
         B: { t: 0, s: 0, r: 0 },
-        C: { t: 0, s: 0, r: 0 }
+        C: { t: 0, s: 0, r: 0 },
+        D: { t: 0, s: 0, r: 0 }
       },
-      why: { A: "[Why A]", B: "[Why B]", C: "[Why C]" },
-      rehearse: "[Your words instruction]",
-      rehearseCheck: "[What the facilitator listens for]",
-      thatDay: "",
-      later: { A: "[Three weeks later after A]", B: "[After B]", C: "[After C]" },
-      note: "[Facilitator note]"
-    },
-
-    3: {
-      scene: { start: 0, end: 0 },
-      text: "[Round 3 question]",
-      setup: "[What the facilitator says before tables discuss]",
-      options: { A: "[Option A]", B: "[Option B]", C: "[Option C]" },
-      answer: "C",
-      scores: {
-        A: { t: 0, s: 0, r: 0 },
-        B: { t: 0, s: 0, r: 0 },
-        C: { t: 0, s: 0, r: 0 }
+      why: {
+        "A": "What would you check to find out whether the work has changed, as well as the mood?",
+        "B": "What has this fixed, and what would tell you Sophie is included beyond the handover you checked?",
+        "C": "Whose problem was this meeting solving? What could Jamie have handled himself?",
+        "D": "If it settles like this, has it settled? What is Jamie's job here?"
       },
-      why: { A: "[Why A]", B: "[Why B]", C: "[Why C]" },
-      rehearse: "[Your words instruction]",
-      rehearseCheck: "[What the facilitator listens for]",
+      rehearse: "",
+      rehearseCheck: "",
       thatDay: "",
-      later: {},
-      note: "[Facilitator note]"
+      later: {
+        "A": "Dave relaxes. \"Right. Fair enough.\" He starts talking to Sophie normally again. They chat in the cabin, and things feel easier between them. When the next setting-out change comes through, Dave passes it straight to the crew. Sophie hears about it afterwards.",
+        "B": "Dave agrees. At the next handover, Sophie sees the setting-out changes before they go to the crew. Jamie checks, and she has the information she needs. Later, Dave and the crew talk through the next job. He listens to their suggestions, but he still doesn't ask Sophie what she thinks.",
+        "C": "Jamie brings Dave and Sophie together. Dave says he feels he can't say anything right. Sophie tells him she knows he means well. They talk, and things become a little easier between them. Afterwards, Sophie catches Jamie on his own. \"I just need the drawings on time,\" she says.",
+        "D": "Jamie leaves it for a couple of weeks. Dave keeps his distance, and the changes still go to the crew first. Sophie asks for updates, then asks again. As the days pass, she stops asking. The others carry on discussing the changes without her."
+      },
+      notes: {
+        "A": "Quick and friendly, and it fixes the misunderstanding. But no working expectation was set and nothing was checked, so the habit carries on. The mood has changed; the work hasn't.",
+        "B": "The operational improvement is real: don't dismiss it as box-ticking. What's left is the relationship. Listen for what Jamie could check beyond the one handover.",
+        "C": "This deliberately echoes the trap in Decision 1 option C: responsibility drifts onto Sophie, who ends up managing Dave's discomfort. Jamie could have handled the expectation himself.",
+        "D": "Feels kind to Dave, and nothing formal is needed. But a pattern of exclusion is now settling in, and Sophie has stopped asking. Silence is still a decision."
+      },
+      note: "Facilitator only, not shown to the room. The strongest response combines A and B: clear up the misunderstanding, set the working expectation, and review it. Let the room build that answer itself rather than presenting it. Clear expectations do not need to wait for Dave to feel comfortable. If Dave agrees but keeps leaving Sophie out, that needs further management action through Story's verified routes; do not invent policy steps."
     }
   }
 };

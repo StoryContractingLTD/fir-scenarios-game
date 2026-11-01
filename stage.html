@@ -488,6 +488,10 @@
     var q = G.questions[st.q], r = G.rounds[st.round];
     var roundText = r ? r.label + '  |  ' + r.title : '';
 
+    // Optional background image behind the question and the room split
+    var bgOn = q && q.bg && ['question', 'voting', 'closed', 'split'].indexOf(st.phase) > -1;
+    el('panel').style.background = bgOn ? 'linear-gradient(rgba(255,255,255,.86), rgba(255,255,255,.86)), url(' + IMG + q.bg + ') center / cover no-repeat' : '';
+
     if (st.phase === 'bridge') {
       var b = G.rounds[st.round].bridge, chars = G.characters || {};
       showSection('v-bridge');
