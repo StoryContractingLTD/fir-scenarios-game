@@ -114,7 +114,7 @@ window.SL_GAME = {
     { title: "Full-time and on call",
       dave: "I need someone who's full-time now and can stay late whenever month-end hits.",
       options: {
-        A: "Keep them in: month-end dates are on the job card in advance, so ask if they can work those dates, not what hours they work now",
+        A: "Keep them in: month-end dates are on the job card in advance, so ask everyone if they can work those dates",
         B: "Keep them in, but ask Rachel and Joanne at interview if they could go full-time",
         C: "Flip down anyone who isn't full-time right now"
       },
