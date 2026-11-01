@@ -171,8 +171,9 @@ window.GG_GAME = {
              spot: [[0.7, ["dave"]], [6.6, ["sophie"]], [8.7, ["dave", "sophie"]], [14.5, ["dave"]], [16.6, ["sophie"]]] },
         B: { audio: "d2-fallout-B.mp3", cast: ["jamie", "dave", "sophie"],
              spot: [[0.75, ["dave"]], [3.85, ["sophie"]], [8.9, ["jamie"]], [12.75, ["dave"]], [17.9, ["sophie"]]] },
-        // C voiceover still to record; spotlights get timed once it's in.
-        C: { audio: "d2-fallout-C.mp3", cast: ["jamie", "dave", "sophie"], spot: [] },
+        // C ends with all three lit: the one route where it comes good.
+        C: { audio: "d2-fallout-C.mp3", cast: ["jamie", "dave", "sophie"],
+             spot: [[0.05, ["dave"]], [3.1, ["jamie"]], [9.15, ["sophie"]], [12.7, ["jamie"]], [13.85, ["dave", "sophie"]], [14.75, ["dave"]], [16.7, ["sophie"]], [18.75, ["jamie", "dave", "sophie"]]] },
         D: { audio: "d2-fallout-D.mp3", cast: ["jamie", "dave", "sophie"],
              spot: [[0.75, ["jamie"]], [4.35, ["dave"]], [8.65, ["sophie"]]] }
       },
