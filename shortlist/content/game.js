@@ -156,11 +156,11 @@ window.SL_GAME = {
       job: 0,
       reveal: "This time Neil's shortcut is fair. Did your table trust it, or push back out of habit?",
       learn: {
-        head: "Not every filter is bias. The test is whether it's needed, linked to the job and applied to everyone.",
+        head: "Not every filter is bias. A good test is whether the job genuinely needs it, and whether it's applied to everyone the same way.",
         points: [
           "Option C is the bias in this round: keeping the rule for Aisha but not for Lee.",
           "Worth asking when the job card is written: is a licence the need, or is getting to sites the need?",
-          "If a disabled applicant can't drive, the employer has to consider reasonable adjustments."
+          "If a disabled applicant can't drive, the employer has a legal duty to make reasonable adjustments, such as another way of getting to sites."
         ],
         fair: "Does every essential criterion on this job card describe something the job really needs?"
       },
