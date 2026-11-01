@@ -72,7 +72,9 @@ window.GG_GAME = {
       // Shared bridge after the fallouts: everyone, whatever they chose, moves on to the Dave scene.
       // panels appear at the given second of the voiceover; spot = who is lit at that second.
       bridge: {
+        eyebrow: "Moving on",
         heading: "Two weeks later",
+        say: "Those were the consequences of your first decision. We're moving forward now to a situation everyone will consider.",
         still: "part2-still.png",
         audio: "bridge-1.mp3",
         cast: ["jamie", "dave", "sophie"],
@@ -84,7 +86,22 @@ window.GG_GAME = {
         spot: [[3.8, ["jamie"]], [5.2, ["dave"]], [7.2, ["sophie"]], [10.3, ["dave"]], [13.9, ["sophie"]], [16.4, ["jamie"]], [17.3, ["dave"]]]
       }
     },
-    { label: "Decision 2", title: "A quiet word with Dave", afterPart: 2, questions: [2] }
+    { label: "Decision 2", title: "A quiet word with Dave", afterPart: 2, questions: [2],
+      // Bridge into Sophie's closing film
+      bridge: {
+        eyebrow: "Before we finish",
+        heading: "Sophie's perspective",
+        say: "Those were the consequences of your second decision. Before we finish, there's one more person to hear from.",
+        still: "part2-still.png",
+        audio: "bridge-2.mp3",
+        cast: ["jamie", "dave", "sophie"],
+        panels: [
+          { at: 0,   text: "We've heard what Jamie did, and what Dave thought." },
+          { at: 3.3, text: "The person we've heard least from is the one this has all been about." }
+        ],
+        spot: [[0.7, ["jamie"]], [1.65, ["dave"]], [5.2, ["sophie"]]]
+      }
+    }
   ],
 
   // The last word, played after Round 3, to the end of the video.

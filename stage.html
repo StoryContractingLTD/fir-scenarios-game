@@ -179,6 +179,8 @@
   .br-p.last { font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2.6cqw; color:var(--amber); }
   .br-cast { flex:0 0 auto; display:flex; gap:2cqw; }
   .br-cast .fo-card { width:14cqw; }
+  .br-cast .fo-card:nth-last-child(3), .br-cast .fo-card:nth-last-child(3) ~ .fo-card { width:11.5cqw; }
+  .br-cast { gap:1.6cqw; }
   #brNext { position:absolute; z-index:3; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; }
   #brNext.on { display:block; }
 
@@ -497,7 +499,7 @@
       showSection('v-bridge');
       el('brImg').src = IMG + b.still;
       el('brBox').innerHTML =
-        '<div class="br-text"><h1 class="br-head"><span>Moving on</span>' + esc(b.heading) + '</h1>' +
+        '<div class="br-text"><h1 class="br-head"><span>' + esc(b.eyebrow || 'Moving on') + '</span>' + esc(b.heading) + '</h1>' +
         b.panels.map(function (p, i) { return '<p class="br-p on' + (i === b.panels.length - 1 ? ' last' : '') + '">' + esc(p.text) + '</p>'; }).join('') + '</div>' +
         '<div class="br-cast">' + (b.cast || []).map(function (k, i) {
           var c = chars[k] || { name: k, img: '' };
