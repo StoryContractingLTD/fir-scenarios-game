@@ -58,7 +58,22 @@ window.GG_GAME = {
 
   // ---- Decisions. afterPart: which part they follow (0 = Part One, 1 = Part Two). ----
   rounds: [
-    { label: "Decision 1", title: "The briefing", afterPart: 1, questions: [1] }
+    { label: "Decision 1", title: "The briefing", afterPart: 1, questions: [1],
+      // Shared bridge after the fallouts: everyone, whatever they chose, moves on to the Dave scene.
+      // panels appear at the given second of the voiceover; spot = who is lit at that second.
+      bridge: {
+        heading: "Two weeks later",
+        still: "part2-still.png",
+        audio: "bridge-1.mp3",
+        cast: ["dave", "sophie"],
+        panels: [
+          { at: 1.5,  text: "Two weeks on. Whatever your table chose at the briefing, Jamie has since had a word with Dave about the comments. Dave's been careful around Sophie ever since." },
+          { at: 10.1, text: "Yesterday, he passed the setting-out changes straight to the crew. Sophie only found out afterwards." },
+          { at: 16.3, text: "Jamie asks Dave for a quiet word." }
+        ],
+        spot: [[4.4, ["dave"]], [7.2, ["sophie"]], [10.3, ["dave"]], [13.9, ["sophie"]], [16.4, ["dave"]]]
+      }
+    }
   ],
 
   // The last word, played after Round 3, to the end of the video.
