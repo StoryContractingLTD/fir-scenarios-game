@@ -45,7 +45,7 @@ window.SL_GAME = {
       behind: "Qualified, licence, NEC experience. Her hours fit the job card",
       look: { eyes: "#4a78a8", skin: "#f3cfb3", hair: "#c9a063", style: "long", outfit: "jumper", top: "#7a3e6b" } },
     { id: "kwame", name: "Kwame Mensah", sex: "m", score: 8,
-      card: "Royal Engineers Corporal, 2010 to 2022", personal: "Gap 2022 to 2023",
+      card: "Royal Engineers Corporal, 2010 to 2022", personal: "Gap 2022 to 2024: resettlement and a QS course",
       behind: "Ran works budgets and costings for his unit, licence. Gap was resettlement and gaining a QS qualification",
       look: { skin: "#6b4128", hair: "#1c1410", style: "crop", outfit: "shirt", top: "#5b6b3a", beard: "short" } },
     { id: "hannah", name: "Hannah Irving", sex: "f", score: 8,
@@ -61,7 +61,7 @@ window.SL_GAME = {
       behind: "Licence, manages budgets, supplier contracts and variations. Studying part-time for a QS degree",
       look: { skin: "#a8714d", hair: "#1d1512", style: "long", outfit: "blazer", top: "#2a6f6f" } },
     { id: "tom", name: "Tom Fairbairn", sex: "m", score: 7,
-      card: "QS, 6 years", personal: "12-month gap in 2023, no reason given",
+      card: "QS, 6 years", personal: "14-month gap, 2023 to 2024, no reason given",
       behind: "Qualified, licence. Gap was recovery from serious illness, which he chose not to disclose",
       look: { eyes: "#5b8fb0", skin: "#f2c9a8", hair: "#b5651d", style: "short", outfit: "jumper", top: "#3f6e4a" } },
     { id: "steven", name: "Steven Bell", sex: "m", score: 6,
@@ -175,10 +175,10 @@ window.SL_GAME = {
         C: "Test against the job card: cost and contract experience in any sector counts"
       },
       best: "C", shortcut: "B",
-      flips: { A: ["priya", "sophie", "steven", "kwame", "aisha"], B: ["priya", "sophie", "hannah", "steven", "kwame", "aisha"], C: [] },
+      flips: { A: ["priya", "sophie", "steven", "kwame", "aisha"], B: ["rachel", "joanne", "priya", "sophie", "hannah", "tom", "steven", "kwame", "aisha"], C: [] },
       why: {
         A: "Halfway to a rule the job doesn't need is still a rule the job doesn't need.",
-        B: "Construction years aren't on the job card. Six applicants gone, including Hannah and Priya.",
+        B: "Construction years aren't on the job card. Nine applicants gone, including Rachel, Joanne, Hannah and Priya.",
         C: "Cost and contract experience counts wherever it was earned."
       },
       job: 1,
