@@ -127,7 +127,13 @@
   .slot.lit .tile { transform:translateY(-.5cqw); }
   .slot.show-score .score { transition:opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1); }
 
-  /* The veto window */
+  /* Flipped back up after discussion */
+  .slot.saved::after { content:'Saved'; position:absolute; top:-.5cqw; right:-.3cqw; z-index:5; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:.8cqw;
+    text-transform:uppercase; letter-spacing:.06cqw; color:#fff; background:var(--green); border:.15cqw solid #fff; border-radius:.35cqw; padding:.15cqw .45cqw;
+    box-shadow:0 .2cqw .5cqw rgba(0,0,0,.3); transform:rotate(6deg); animation:stampIn2 .4s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes stampIn2 { 0% { opacity:0; transform:rotate(6deg) scale(2); } 100% { opacity:1; transform:rotate(6deg) scale(1); } }
+
+  /* How the room voted */
   .vrow { display:flex; gap:.8cqw; align-items:flex-start; border:.18cqw solid var(--line); border-radius:.9cqw; padding:.55cqw .8cqw; }
   .vrow.win { border-color:#c62828; background:#fdecee; }
   .vrow.win .L { background:#c62828; }
@@ -452,7 +458,7 @@
       case 'dave': stopAudio(); play(S.whoosh, 0.5); say([R.neil], 700); break;
       case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
       case 'closed': stopAudio(); beep(523, 0.25); setTimeout(function () { report('closed-done'); }, 1500); break;
-      case 'veto': stopAudio(); beep(330, 0.25); setTimeout(function () { beep(330, 0.25); }, 350); break;
+      case 'veto': stopAudio(); play(S.swish, 0.5); break;
       case 'reveal':
         stopAudio();
         if (st.vetoBy) beep(220, 0.4); else play(S.swish, 0.5);
@@ -492,7 +498,7 @@
   function downStates(down) { var s = {}; (down || []).forEach(function (id) { s[id] = 'down'; }); return s; }
 
   function render(st) {
-    var sig = JSON.stringify([st.phase, st.round, st.joinUrl, st.teamCount, st.answered, st.counts, st.down, st.decision, st.scores, st.closeReason, st.teamVotes, st.vetoBy, st.vetoHolders, st.doomed]);
+    var sig = JSON.stringify([st.phase, st.round, st.joinUrl, st.teamCount, st.answered, st.counts, st.down, st.decision, st.scores, st.closeReason, st.teamVotes, st.vetoBy, st.vetoHolders, st.doomed, st.saved]);
     if (sig === lastSig) return;
     lastSig = sig;
 
@@ -546,15 +552,14 @@
 
     else if (st.phase === 'veto') {
       el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + '  |  How the room voted';
-      pill('Veto window', true);
+      pill('Talk it through');
       var tv = st.teamVotes || [];
       body = '<div class="opts">' + Object.keys(r.options).map(function (L) {
         var who = tv.filter(function (x) { return x.choice === L; }).map(function (x) { return '<span class="tchip">' + esc(x.name) + '</span>'; }).join('');
         return '<div class="vrow' + (L === st.decision ? ' win' : '') + '"><span class="L">' + L + '</span><div class="rv-mid"><p class="rv-title">' + esc(r.options[L]) + '</p><div class="tchips">' + (who || '<span class="muted" style="font-size:.9cqw">No tables</span>') + '</div></div></div>';
       }).join('') + '</div>';
-      body += '<div class="doom">The room goes with <b>' + st.decision + '</b>. If it stands, ' + esc(listNames(st.doomed || [])) + ((st.doomed || []).length === 1 ? ' flips' : ' flip') + ' down.</div>';
-      body += '<div class="vetobox"><b>&#9995; Got a veto left?</b> Use it on your phone now, and tell the room why.<span>' +
-        ((st.vetoHolders || []).length ? 'Vetoes left: ' + esc(st.vetoHolders.join(', ')) : 'Nobody has a veto left.') + '</span></div>';
+      body += '<div class="doom">The room goes with <b>' + st.decision + '</b>. ' + ((st.doomed || []).length ? esc(listNames(st.doomed)) + (st.doomed.length === 1 ? ' flips' : ' flip') + ' down.' : 'Nobody flips down.') + '</div>';
+      body += '<p class="lp-foot">Why did tables choose differently?</p>';
       var sv = downStates(down); (st.doomed || []).forEach(function (id) { sv[id] = 'doomed'; });
       setBoard(sv, false);
     }
@@ -590,7 +595,7 @@
       el('lpEyebrow').textContent = 'The final reveal';
       var women = standing.filter(function (a) { return a.sex === 'f'; }).length;
       body = '<p class="lp-big">The room\'s shortlist</p>' +
-        '<div class="stat"><div><b>' + standing.length + '</b>still standing</div><div class="' + (women ? '' : 'warn') + '"><b>' + women + '</b>' + (women === 1 ? 'woman' : 'women') + '</div><div><b>' + down.length + '</b>flipped down</div></div>' +
+        '<div class="stat"><div><b>' + standing.length + '</b>still standing</div><div class="' + (women ? '' : 'warn') + '"><b>' + women + '</b>' + (women === 1 ? 'woman' : 'women') + '</div><div><b>' + down.length + '</b>flipped down</div>' + ((st.saved || []).length ? '<div><b>' + st.saved.length + '</b>saved after discussion</div>' : '') + '</div>' +
         '<p class="lp-big" style="color:var(--blue);margin-top:auto">' + esc(G.final.roomAsk) + '</p>';
       setBoard(downStates(down), false);
     }
@@ -602,6 +607,7 @@
       body = '<p class="lp-big">Every card now shows its score against the job card</p>' +
         '<div class="stat"><div class="' + (lostTop.length ? 'warn' : '') + '"><b>' + lostTop.length + ' of 5</b>top applicants flipped down</div></div>' +
         (lost.length ? '<p class="names">' + lost.map(function (a) { return '<b>' + esc(first(a.id)) + '</b> ' + a.score + ': ' + esc(a.behind); }).slice(0, 4).join('<br>') + '</p>' : '<p class="lp-text">The room kept every applicant in. Nobody was lost to a shortcut.</p>');
+      if ((st.saved || []).length) body += '<p class="lp-text">Saved after discussion: ' + esc(listNames(st.saved)) + '.</p>';
       var s2 = {}; down.forEach(function (id) { s2[id] = 'out'; });
       setBoard(s2, true);
     }
@@ -628,6 +634,11 @@
     }
 
     el('lpBody').innerHTML = body;
+    // Cards the facilitator flipped back up carry a small "Saved" tag (not on the what-if screens).
+    var showSaved = ['f-shortcut', 'f-spec'].indexOf(st.phase) < 0;
+    document.querySelectorAll('.slot').forEach(function (c) {
+      c.classList.toggle('saved', showSaved && (st.saved || []).indexOf(c.getAttribute('data-id')) > -1 && c.className.indexOf(' down') < 0);
+    });
   }
 
   function drawBoard(scores) {

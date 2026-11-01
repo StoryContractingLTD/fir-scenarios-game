@@ -61,6 +61,9 @@
   .mono { font-family:Consolas, monospace; font-size:13px; }
   .ok { color:var(--green); font-weight:600; font-size:14px; min-height:18px; margin:8px 0 0; }
   .note { background:#fff6dd; border-radius:10px; padding:10px 14px; font-size:13px; line-height:1.45; color:#5c4300; margin:0 0 14px; }
+  .flipbox { margin-top:10px; padding-top:8px; border-top:1px solid #dde3ea; }
+  .flipbtn { margin:4px 6px 0 0; padding:6px 10px; font-size:14px; }
+  .flipbtn.on { background:#e7f6ee; border-color:#1f9d57; color:#14713d; }
 </style>
 </head>
 <body>
@@ -149,7 +152,7 @@
       case 'dave': return R + ": Neil's shortcut (" + G.rounds[s.round].title + ')';
       case 'voting': return R + ': discuss and vote';
       case 'closed': return R + ': close voting';
-      case 'veto': return R + ': how the room voted (veto window)';
+      case 'veto': return R + ': how the room voted';
       case 'reveal': return R + ': reveal';
       case 'learn': return R + ': why it matters';
       case 'f-room': return "Final: the room's shortlist";
@@ -192,12 +195,20 @@
     return votes.filter(function (v) { return v.q === 101 + ri; })
       .sort(function (a, b) { return String(a.created_at).localeCompare(String(b.created_at)); });
   }
-  function vetoTeam(ri) { var v = vetoesFor(ri)[0]; return v ? v.team_id : null; }
+  // Vetoes are switched off: the facilitator flips cards back up instead (savedIn below).
+  function vetoTeam(ri) { return null; }
   function teamName(id) { var t = teams.filter(function (x) { return x.id === id; })[0]; return t ? t.name : ''; }
   function vetoHolders() {
-    var used = {}; votes.forEach(function (v) { if (v.q > 100) used[v.team_id] = 1; });
-    return teams.filter(function (t) { return !used[t.id]; }).map(function (t) { return t.name; });
+    return [];
   }
+  // ---- Flip back: the facilitator can turn a card back up after the room talks it through ----
+  // savedIn[id] = the round it was flipped back in. Kept on this laptop for the session.
+  var savedIn = {};
+  function saveKey() { return 'wls-saved-' + sessionId; }
+  function loadSaved() { try { savedIn = JSON.parse(localStorage.getItem(saveKey()) || '{}'); } catch (e) { savedIn = {}; } }
+  function storeSaved() { try { localStorage.setItem(saveKey(), JSON.stringify(savedIn)); } catch (e) {} }
+  function savedNow() { var d = downList(step); return Object.keys(savedIn).filter(function (id) { return d.indexOf(id) < 0; }); }
+
   // Applicants this round's decision would newly flip down.
   function newlyFlipped(ri) {
     var dec = decisionFor(ri); if (!dec) return [];
@@ -212,6 +223,8 @@
       if (beforeRound !== undefined && ri >= beforeRound) return;
       var dec = decisionFor(ri);
       if (dec && !vetoTeam(ri)) r.flips[dec].forEach(function (id) { d[id] = 1; });
+      // Cards the facilitator flipped back up after this round's discussion
+      Object.keys(savedIn).forEach(function (id) { if (savedIn[id] === ri) delete d[id]; });
     });
     return G.applicants.map(function (a) { return a.id; }).filter(function (id) { return d[id]; });
   }
@@ -250,6 +263,7 @@
       vetoBy: s.round >= 0 && vetoTeam(s.round) ? teamName(vetoTeam(s.round)) : '',
       vetoBonus: s.round >= 0 && vetoTeam(s.round) ? decisionFor(s.round) !== G.rounds[s.round].best : false,
       vetoHolders: vetoHolders(),
+      saved: savedNow(),
       scores: scores,
       winners: scores.filter(function (x) { return x.score === top && top > 0; }).map(function (x) { return x.name; }),
       cue: cue, endsAt: s.phase === 'veto' ? vetoEndsAt : votingEndsAt, closeReason: closeReason, musicOn: musicOn
@@ -282,7 +296,7 @@
     busy = true; renderControls();
     var s = STEPS[i];
     var res = await sb.from('sg_state')
-      .update({ step: i, phase: s.phase === 'veto' ? 'voting' : s.phase, q_index: s.phase === 'veto' ? 100 + s.q : s.q, updated_at: new Date().toISOString() })
+      .update({ step: i, phase: s.phase === 'veto' ? 'closed' : s.phase, q_index: s.q, updated_at: new Date().toISOString() })
       .eq('id', 1).select('id');
     busy = false;
     if (res.error || !res.data || !res.data.length) {
@@ -293,7 +307,7 @@
     step = i;
     autoReveal = false; clearTimeout(revealFallback);
     votingEndsAt = s.phase === 'voting' ? Date.now() + VOTE_MS : 0;
-    vetoEndsAt = s.phase === 'veto' ? Date.now() + VETO_MS : 0;
+    vetoEndsAt = 0;
     cue = { id: cue.id + 1, at: Date.now() };
     render(); sendToStage(); poll();
   }
@@ -321,19 +335,9 @@
     if (!autoReveal || STEPS[step].phase !== 'closed') return;
     autoReveal = false;
     await poll(true); // make sure the last votes are in before the board moves
-    // Nothing would flip? Skip the veto window and go straight to the reveal.
-    goTo(newlyFlipped(STEPS[step].round).length ? step + 1 : step + 2);
+    // On to "How the room voted". The facilitator presses Next when the room has talked it through.
+    goTo(step + 1);
   }
-  // Veto window: ends on the first veto, or when the time runs out.
-  var leavingVeto = false;
-  setInterval(async function () {
-    var s = STEPS[step];
-    if (s.phase !== 'veto' || leavingVeto || busy) return;
-    await poll(true);
-    var left = Math.max(0, Math.ceil((vetoEndsAt - Date.now()) / 1000));
-    el('timerText').textContent = left + 's to veto';
-    if (vetoTeam(s.round) || left <= 0) { leavingVeto = true; await goTo(step + 1); leavingVeto = false; }
-  }, 1000);
   setInterval(function () {
     if (STEPS[step].phase === 'veto') return;
     if (STEPS[step].phase !== 'voting' || !votingEndsAt) { el('timerText').textContent = ''; return; }
@@ -391,8 +395,7 @@
     else if (s.phase === 'veto') {
       var dv = decisionFor(s.round);
       html = '<p><span class="lbl">The room chose ' + (dv || '-') + '.</span> ' + esc(dv ? r.options[dv] : '') + '</p>' +
-        '<p>Every table\'s choice is on the big screen. Any table with a veto left can stop this from their phone. The window closes on the first veto, or after ' + (VETO_MS / 1000) + ' seconds.</p>' +
-        '<p><span class="lbl">Vetoes left:</span> ' + esc(vetoHolders().join(', ') || 'none') + '</p>';
+        '<p>Every table\'s choice is on the big screen, and the cards about to fall are shaking. Ask a table from each side why they chose it. Press Next for the reveal.</p>';
     }
     else {
       html += '<p><span class="lbl">Neil:</span> ' + esc(r.dave) + '</p>';
@@ -404,12 +407,27 @@
         html += '<p><span class="lbl">Room chose:</span> ' + (dec || 'no votes') + '</p>';
       }
       html += '<p><span class="lbl">Ask:</span> ' + esc(r.prompt) + '</p>';
-      if (s.phase === 'reveal' && vetoTeam(s.round)) html += '<p><span class="lbl">Vetoed by ' + esc(teamName(vetoTeam(s.round))) + '.</span> Ask them why. ' + (decisionFor(s.round) !== r.best ? 'They stopped a weak call: +5.' : 'They stopped the strongest option: no bonus. Ask the room whether they were right.') + '</p>';
       if (s.phase === 'reveal') html += '<p><span class="lbl">Then ask:</span> Who else does this catch?</p>';
       if (s.phase === 'learn') html += '<p><span class="lbl">On screen:</span> ' + esc(r.learn.head) + '</p><p><span class="lbl">Fair question:</span> ' + esc(r.learn.fair) + '</p>';
       if (r.notes && s.phase !== 'dave') html += '<p><span class="lbl">Notes:</span> ' + esc(r.notes) + '</p>';
+      if (s.phase === 'reveal' || s.phase === 'learn') {
+        var downNow = downList(step);
+        var list = G.applicants.filter(function (a) { return downNow.indexOf(a.id) > -1 || savedIn[a.id] === s.round; });
+        html += '<div class="flipbox"><p><span class="lbl">Flip a card back up</span> when the room has talked itself round. Click again to undo.</p>' +
+          (list.length ? list.map(function (a) {
+            var up = savedIn[a.id] === s.round;
+            return '<button class="btn ghost flipbtn' + (up ? ' on' : '') + '" data-id="' + a.id + '">' + (up ? '&#8617; ' : '&#8593; ') + esc(a.name) + (up ? ' (saved)' : '') + '</button>';
+          }).join('') : '<p class="muted">Nobody is flipped down.</p>') + '</div>';
+      }
     }
     el('nowBox').innerHTML = html;
+    el('nowBox').querySelectorAll('.flipbtn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-id'), ri = STEPS[step].round;
+        if (savedIn[id] === ri) delete savedIn[id]; else savedIn[id] = ri;
+        storeSaved(); render(); sendToStage();
+      });
+    });
     renderControls();
     renderLive();
   }
@@ -423,8 +441,7 @@
     el('answeredCount').textContent = showQ ? Object.keys(answeredIds).length + ' answered' : '';
     el('teamEmpty').style.display = teams.length ? 'none' : 'block';
     el('teamList').innerHTML = teams.map(function (t) {
-      var hasVeto = vetoHolders().indexOf(t.name) > -1;
-      return '<span class="chip' + (showQ && answeredIds[t.id] ? ' done' : '') + '" title="' + (hasVeto ? 'Veto still to use' : 'Veto used') + '">' + esc(t.name) + (hasVeto ? ' <span style="color:#b00020">&#9995;</span>' : '') + '</span>';
+      return '<span class="chip' + (showQ && answeredIds[t.id] ? ' done' : '') + '">' + esc(t.name) + '</span>';
     }).join('');
     var r = G.rounds[s.round];
     if (showQ && r) {
@@ -464,7 +481,7 @@
     var id = 'sl-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 7);
     var res = await sb.from('sg_state').update({ session_id: id, step: 0, phase: 'join', q_index: 0, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
     if (res.error || !res.data || !res.data.length) { el('sessionMsg').textContent = ''; showErr('New session not saved: check the connection and try again.'); return; }
-    sessionId = id; ours = true; step = 0; teams = []; votes = [];
+    sessionId = id; ours = true; step = 0; teams = []; votes = []; savedIn = {}; storeSaved();
     cue = { id: cue.id + 1, at: Date.now() };
     el('sessionText').textContent = sessionId;
     el('sessionMsg').textContent = 'New session started. Phones will return to the join screen.';
@@ -491,6 +508,7 @@
     setStatus('live');
     sessionId = res.data.session_id;
     ours = /^sl-/.test(sessionId);
+    loadSaved();
     step = ours ? Math.min(Math.max(res.data.step || 0, 0), STEPS.length - 1) : 0;
     el('sessionText').textContent = sessionId;
     if (!ours) el('sessionMsg').textContent = 'The live session belongs to another game. Press New session to start this one.';
