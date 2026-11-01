@@ -435,13 +435,37 @@
       o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + dur + 0.05);
     } catch (e) {}
   }
+  // Voiceovers: played after a short delay, in order. Moving on cancels anything not yet started.
+  var cueTok = 0;
+  function say(files, delay) {
+    var tok = cueTok, list = (files || []).filter(Boolean);
+    setTimeout(function next() {
+      if (tok !== cueTok || !list.length) return;
+      play(list.shift(), 1, false, false, function () { if (tok === cueTok) setTimeout(next, 250); });
+    }, delay || 0);
+  }
   function playCue(st) {
+    cueTok++;
+    var V = G.voice || {}, R = (V.rounds || [])[st.round] || {};
     switch (st.phase) {
+      case 'intro': stopAudio(); play(S.whoosh, 0.5); say([V.intro], 700); break;
+      case 'dave': stopAudio(); play(S.whoosh, 0.5); say([R.neil], 700); break;
       case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
       case 'closed': stopAudio(); beep(523, 0.25); setTimeout(function () { report('closed-done'); }, 1500); break;
       case 'veto': stopAudio(); beep(330, 0.25); setTimeout(function () { beep(330, 0.25); }, 350); break;
-      case 'reveal': stopAudio(); if (st.vetoBy) { beep(220, 0.4); } else beep(784, 0.3); break;
-      case 'f-spec': stopAudio(); [0, 1, 2, 3, 4].forEach(function (i) { setTimeout(function () { beep(660 + i * 110, 0.15); }, 300 + i * 550); }); break;
+      case 'reveal':
+        stopAudio();
+        if (st.vetoBy) beep(220, 0.4); else play(S.swish, 0.5);
+        // Wait for the tiles to finish falling before the reveal line.
+        var r = G.rounds[st.round], dec = st.decision;
+        var n = (dec && !st.vetoBy) ? r.flips[dec].filter(function (id) { return (st.downBefore || []).indexOf(id) < 0; }).length : 0;
+        say([R.reveal], n ? (0.15 + (n - 1) * 0.45 + 0.62 + 0.7) * 1000 : 1000);
+        break;
+      case 'learn': stopAudio(); play(S.whoosh, 0.5); say([R.learn], 700); break;
+      case 'f-room': stopAudio(); play(S.whoosh, 0.5); say([V.room], 700); break;
+      case 'f-scores': stopAudio(); play(S.whoosh, 0.5); say([V.scores], 700); break;
+      case 'f-shortcut': stopAudio(); play(S.whoosh, 0.5); say(V.shortcut, 700); break;
+      case 'f-spec': stopAudio(); [0, 1, 2, 3, 4].forEach(function (i) { setTimeout(function () { beep(660 + i * 110, 0.15); }, 300 + i * 550); }); say([V.spec], 3200); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
       default: stopAudio();
     }

@@ -308,6 +308,26 @@ window.SL_GAME = {
       notes: "C will be popular: it feels generous. Ask who loses out when the courtesy slot goes to Mark." }
   ],
 
+  // ---- Voiceovers (in assets/audio, one folder up). Narrator, except "neil". ----
+  voice: {
+    intro: "wls-01.mp3",
+    // One per round, in order: Neil's shortcut, the reveal line, "Why it matters".
+    rounds: [
+    { neil: "wls-02.mp3", reveal: "wls-03.mp3", learn: "wls-04.mp3" },
+    { neil: "wls-05.mp3", reveal: "wls-06.mp3", learn: "wls-07.mp3" },
+    { neil: "wls-08.mp3", reveal: "wls-09.mp3", learn: "wls-10.mp3" },
+    { neil: "wls-11.mp3", reveal: "wls-12.mp3", learn: "wls-13.mp3" },
+    { neil: "wls-14.mp3", reveal: "wls-15.mp3", learn: "wls-16.mp3" },
+    { neil: "wls-17.mp3", reveal: "wls-18.mp3", learn: "wls-19.mp3" },
+    { neil: "wls-20.mp3", reveal: "wls-21.mp3", learn: "wls-22.mp3" },
+    { neil: "wls-23.mp3", reveal: "wls-24.mp3", learn: "wls-25.mp3" }
+    ],
+    room: "wls-26.mp3",        // "Here's the room's shortlist..."
+    scores: "wls-27.mp3",      // "Every card now shows its score..."
+    shortcut: ["wls-28.mp3", "wls-29.mp3", "wls-30.mp3"],   // narrator, Neil, narrator
+    spec: "wls-31.mp3"         // "The shortlist the job card picks..."
+  },
+
   final: {
     roomAsk: "Happy with this shortlist?",
     shortcutHead: "If every one of Neil's shortcuts had gone through",

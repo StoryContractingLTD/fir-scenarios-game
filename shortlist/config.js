@@ -24,6 +24,8 @@ window.SL_CONFIG = {
   images: { logo: "story-logo.png" },
   sounds: {
     votingMusic: "scenario-focus.mp3",   // loops while tables discuss and vote
-    showEnd:     "scenario-focus.mp3"    // loops under the final scores
+    showEnd:     "scenario-focus.mp3",   // loops under the final scores
+    whoosh:      "wls-whoosh.mp3",       // soft transition as each new screen comes up
+    swish:       "wls-swish.mp3"         // softer transition into each reveal
   }
 };
