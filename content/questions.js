@@ -59,6 +59,8 @@ window.GG_GAME = {
 
   // The characters shown in the fallout screens (images in assets/images).
   characters: {
+    // Jamie is a featureless silhouette: he's whoever is sat at the table.
+    jamie:  { name: "Jamie",  img: "char-jamie.jpg" },
     dave:   { name: "Dave",   img: "char-dave.jpg" },
     sophie: { name: "Sophie", img: "char-sophie.jpg" },
     marcus: { name: "Marcus", img: "char-marcus.jpg" }
@@ -73,13 +75,13 @@ window.GG_GAME = {
         heading: "Two weeks later",
         still: "part2-still.png",
         audio: "bridge-1.mp3",
-        cast: ["dave", "sophie"],
+        cast: ["jamie", "dave", "sophie"],
         panels: [
           { at: 1.5,  text: "Two weeks on. Whatever your table chose at the briefing, Jamie has since had a word with Dave about the comments. Dave's been careful around Sophie ever since." },
           { at: 10.1, text: "Yesterday, he passed the setting-out changes straight to the crew. Sophie only found out afterwards." },
           { at: 16.3, text: "Jamie asks Dave for a quiet word." }
         ],
-        spot: [[4.4, ["dave"]], [7.2, ["sophie"]], [10.3, ["dave"]], [13.9, ["sophie"]], [16.4, ["dave"]]]
+        spot: [[3.8, ["jamie"]], [5.2, ["dave"]], [7.2, ["sophie"]], [10.3, ["dave"]], [13.9, ["sophie"]], [16.4, ["jamie"]], [17.3, ["dave"]]]
       }
     },
     { label: "Decision 2", title: "A quiet word with Dave", afterPart: 2, questions: [2] }
@@ -108,11 +110,11 @@ window.GG_GAME = {
       // Times are about 0.3s before the name is spoken, so the pop lands on the word.
       // null = nobody spotlit (used while the voice is talking about Jamie).
       fallout: {
-        A: { audio: "d1-fallout-A.mp3", cast: ["dave", "sophie", "marcus"],
-             spot: [[1.85, ["dave"]], [5.85, null], [10.2, ["marcus"]], [12.9, ["sophie"]], [16.9, ["dave"]]] },
-        B: { audio: "d1-fallout-B.mp3", cast: ["dave", "sophie", "marcus"],
-             spot: [[8.2, ["dave"]], [12.45, ["sophie", "marcus"]], [20.05, ["sophie"]]] },
-        C: { audio: "d1-fallout-C.mp3", cast: ["sophie"], spot: [[3.6, ["sophie"]]] },
+        A: { audio: "d1-fallout-A.mp3", cast: ["jamie", "dave", "sophie", "marcus"],
+             spot: [[1.85, ["dave"]], [5.85, ["jamie"]], [10.2, ["marcus"]], [12.9, ["sophie"]], [16.9, ["dave"]]] },
+        B: { audio: "d1-fallout-B.mp3", cast: ["jamie", "dave", "sophie", "marcus"],
+             spot: [[0.75, ["jamie"]], [8.2, ["dave"]], [12.45, ["sophie", "marcus"]], [20.05, ["sophie"]]] },
+        C: { audio: "d1-fallout-C.mp3", cast: ["jamie", "sophie"], spot: [[0.75, ["jamie"]], [3.6, ["sophie"]], [14.1, ["jamie"]]] },
         D: { audio: "d1-fallout-D.mp3", cast: ["dave", "marcus", "sophie"],
              spot: [[7.85, ["dave"]], [10.1, ["marcus"]], [13.3, ["sophie"]]] }
       },
@@ -163,12 +165,16 @@ window.GG_GAME = {
       setup: "",
       // Background image behind the question and the room split
       bg: "part3-still.png",
-      // Fallout voiceovers to record: d2-fallout-A.mp3 to D. Spot timings get set once recorded.
+      // Fallout voiceovers: d2-fallout-A.mp3 to D. Spot timings set from the recordings.
       fallout: {
-        A: { audio: "d2-fallout-A.mp3", cast: ["dave", "sophie"], spot: [] },
-        B: { audio: "d2-fallout-B.mp3", cast: ["dave", "sophie"], spot: [] },
-        C: { audio: "d2-fallout-C.mp3", cast: ["dave", "sophie"], spot: [] },
-        D: { audio: "d2-fallout-D.mp3", cast: ["dave", "sophie"], spot: [] }
+        A: { audio: "d2-fallout-A.mp3", cast: ["dave", "sophie"],
+             spot: [[0.7, ["dave"]], [6.6, ["sophie"]], [8.7, ["dave", "sophie"]], [14.5, ["dave"]], [16.6, ["sophie"]]] },
+        B: { audio: "d2-fallout-B.mp3", cast: ["jamie", "dave", "sophie"],
+             spot: [[0.75, ["dave"]], [3.85, ["sophie"]], [8.9, ["jamie"]], [12.75, ["dave"]], [17.9, ["sophie"]]] },
+        C: { audio: "d2-fallout-C.mp3", cast: ["jamie", "dave", "sophie"],
+             spot: [[0.7, ["jamie"]], [1.6, ["dave", "sophie"]], [4.85, ["dave"]], [7.9, ["sophie"]], [10.75, ["dave", "sophie"]], [14.85, ["sophie", "jamie"]], [17.0, ["sophie"]]] },
+        D: { audio: "d2-fallout-D.mp3", cast: ["jamie", "dave", "sophie"],
+             spot: [[0.75, ["jamie"]], [4.35, ["dave"]], [8.65, ["sophie"]]] }
       },
       options: {
         "A": "Clear up the misunderstanding: \"You can still have a laugh with her, Dave. I asked you to leave her looks out of it, not leave her out of the job.\"",
