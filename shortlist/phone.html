@@ -57,6 +57,11 @@
   .timer { font-family:'Montserrat', Arial, sans-serif; font-weight:700; font-size:15px; color:var(--story-blue); background:#e9f1f9; border-radius:999px; padding:6px 14px; align-self:flex-start; margin:0 0 12px; }
   .timer.hurry { background:#fdf0e0; color:#b35c00; }
   .centre .timer { align-self:center; }
+  .veto-badge { width:76px; height:76px; border-radius:50%; background:#fdecee; font-size:40px; display:flex; align-items:center; justify-content:center; margin:6px auto 12px; }
+  .btn.veto-btn { background:#b00020; }
+  .btn.veto-btn:hover { background:#8c0019; }
+  .btn.veto-btn.confirm { background:#fff; color:#b00020; border:3px solid #b00020; animation:pulseV 1s ease-in-out infinite; }
+  @keyframes pulseV { 50% { transform:scale(1.03); } }
   .hide { display:none !important; }
 </style>
 </head>
@@ -105,6 +110,17 @@
       <p class="msgline" id="voteMsg"></p>
     </div>
 
+    <!-- VETO -->
+    <div class="screen centre hide" id="screen-veto">
+      <p class="timer hide" data-timer></p>
+      <div class="veto-badge">&#9995;</div>
+      <h1 style="color:#b00020">Veto?</h1>
+      <p class="helper" id="vetoMsg">The room has decided. Check the big screen. If you think it's wrong, you can stop it.<br><br>You only get <b>one veto all game</b>, and you'll need to tell the room why.</p>
+      <div class="spacer"></div>
+      <button class="btn veto-btn" id="vetoBtn">Use our veto</button>
+      <p class="msgline" id="vetoLine"></p>
+    </div>
+
     <!-- LOCKED -->
     <div class="screen centre hide" id="screen-locked">
       <div class="spacer"></div>
@@ -137,7 +153,7 @@
   try { voted = JSON.parse(load('sl_voted') || '{}'); } catch (e) { voted = {}; }
   var teamChecked = false, sending = false, sig = '', live = null;
 
-  var screens = ['load', 'join', 'wait', 'vote', 'locked'];
+  var screens = ['load', 'join', 'wait', 'vote', 'veto', 'locked'];
   function show(name) { screens.forEach(function (s) { el('screen-' + s).classList.toggle('hide', s !== name); }); }
   function setStatus(s) { var d = el('statusDot'); d.classList.remove('live', 'down'); if (s) d.classList.add(s); }
 
@@ -243,8 +259,43 @@
     winner: "That's the end. Thanks for taking part!"
   };
 
+  // ---- Veto: one per table per game, stored as a vote on question 100 + round ----
+  function vetoUsed() { return Object.keys(voted).some(function (k) { return +k > 100; }); }
+  var vetoArmed = false;
+  el('vetoBtn').addEventListener('click', async function () {
+    var qn = live && live.q_index;
+    if (!qn || qn <= 100 || sending) return;
+    if (!vetoArmed) { vetoArmed = true; this.textContent = 'Are you sure? Tap again to veto'; this.classList.add('confirm'); return; }
+    sending = true; this.disabled = true; el('vetoLine').className = 'msgline info'; el('vetoLine').textContent = 'Sending your veto...';
+    var res;
+    try { res = await sb.from('sg_votes').insert({ session_id: mySession, team_id: teamId, q: qn, choice: 'A' }); }
+    catch (e) { res = { error: { code: 'network' } }; }
+    sending = false;
+    if (!res.error || res.error.code === '23505') {
+      voted[qn] = 'V'; store('sl_voted', JSON.stringify(voted));
+      sig = 'vetoed-' + qn; el('waitTeam').textContent = teamName || 'Your table';
+      el('waitMsg').textContent = "Veto used! Get ready to tell the room why you stopped it."; show('wait'); return;
+    }
+    this.disabled = false;
+    el('vetoLine').className = 'msgline err';
+    el('vetoLine').textContent = res.error.code === '42501' ? 'Too late, the veto window has closed.' : 'Not sent. Check your signal and tap again.';
+  });
+
   function render(st) {
     var qn = st.q_index;
+    if (st.phase === 'voting' && qn > 100) {
+      if (vetoUsed()) {
+        var s0 = 'veto-used-' + qn;
+        if (sig !== s0) { sig = s0; el('waitTeam').textContent = teamName || 'Your table'; el('waitMsg').textContent = voted[qn] ? 'Veto used! Get ready to tell the room why you stopped it.' : "You've already used your veto. Watch the big screen."; show('wait'); }
+        return;
+      }
+      if (sig !== 'veto-' + qn) {
+        sig = 'veto-' + qn; vetoArmed = false;
+        var b = el('vetoBtn'); b.disabled = false; b.textContent = 'Use our veto'; b.classList.remove('confirm');
+        el('vetoLine').textContent = ''; show('veto');
+      }
+      return;
+    }
     if (st.phase === 'voting' && G.rounds[qn - 1]) {
       if (voted[qn]) { if (sig !== 'locked-' + qn) lockIn(qn, voted[qn]); return; }
       if (sig !== 'vote-' + qn) { sig = 'vote-' + qn; buildVote(qn); show('vote'); }
@@ -301,8 +352,9 @@
   setInterval(function () {
     var boxes = document.querySelectorAll('[data-timer]');
     var on = live && live.phase === 'voting' && live.updated_at;
-    var left = on ? Math.ceil((Date.parse(live.updated_at) + VOTE_MS - Date.now()) / 1000) : 0;
-    left = Math.max(0, Math.min(left, VOTE_MS / 1000));
+    var ms = live && live.q_index > 100 ? (C.vetoSeconds || 20) * 1000 : VOTE_MS;
+    var left = on ? Math.ceil((Date.parse(live.updated_at) + ms - Date.now()) / 1000) : 0;
+    left = Math.max(0, Math.min(left, ms / 1000));
     boxes.forEach(function (b) {
       b.classList.toggle('hide', !on);
       b.classList.toggle('hurry', on && left <= 10);

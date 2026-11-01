@@ -127,6 +127,22 @@
   .slot.lit .tile { transform:translateY(-.5cqw); }
   .slot.show-score .score { transition:opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1); }
 
+  /* The veto window */
+  .vrow { display:flex; gap:.8cqw; align-items:flex-start; border:.18cqw solid var(--line); border-radius:.9cqw; padding:.55cqw .8cqw; }
+  .vrow.win { border-color:#c62828; background:#fdecee; }
+  .vrow.win .L { background:#c62828; }
+  .tchips { display:flex; flex-wrap:wrap; gap:.35cqw; margin-top:.35cqw; }
+  .tchip { font-family:'Montserrat', Arial, sans-serif; font-size:.85cqw; font-weight:700; background:var(--blue-pale); color:var(--blue-dark); padding:.2cqw .6cqw; border-radius:99cqw; animation:fadeUp .4s ease-out both; }
+  .vrow.win .tchip { background:#fff; color:#c62828; }
+  .doom { margin:.8cqw 0 .6cqw; font-size:1.25cqw; line-height:1.4; }
+  .vetobox { margin-top:auto; background:#c62828; color:#fff; border-radius:.9cqw; padding:.8cqw 1cqw; font-size:1.3cqw; line-height:1.35; animation:vpulse 1.2s ease-in-out infinite; }
+  .vetobox span { display:block; font-size:.95cqw; opacity:.85; margin-top:.3cqw; }
+  @keyframes vpulse { 50% { box-shadow:0 0 0 .5cqw rgba(198,40,40,.25); } }
+  .slot.doomed .frame { box-shadow:inset 0 .16cqw 0 rgba(255,255,255,.6), 0 0 0 .3cqw #c62828, 0 0 1.6cqw .4cqw rgba(198,40,40,.6); animation:shake .5s ease-in-out infinite; transform-origin:50% 100%; }
+  @keyframes shake { 0%, 100% { transform:rotate(0); } 25% { transform:rotate(-1.6deg); } 75% { transform:rotate(1.6deg); } }
+  .decision.vetoed { background:#c62828; }
+  .rv-who { font-family:'Montserrat', Arial, sans-serif; font-size:.82cqw; font-weight:700; color:var(--blue); margin:.25cqw 0 0; }
+
   /* Why it matters */
   .learn-head { font-family:'Montserrat', Arial, sans-serif; font-size:1.75cqw; font-weight:800; color:var(--ink); line-height:1.25; margin:.3cqw 0 1cqw; }
   .learn { list-style:none; margin:0 0 1cqw; padding:0; display:flex; flex-direction:column; gap:.7cqw; }
@@ -423,7 +439,8 @@
     switch (st.phase) {
       case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
       case 'closed': stopAudio(); beep(523, 0.25); setTimeout(function () { report('closed-done'); }, 1500); break;
-      case 'reveal': stopAudio(); beep(784, 0.3); break;
+      case 'veto': stopAudio(); beep(330, 0.25); setTimeout(function () { beep(330, 0.25); }, 350); break;
+      case 'reveal': stopAudio(); if (st.vetoBy) { beep(220, 0.4); } else beep(784, 0.3); break;
       case 'f-spec': stopAudio(); [0, 1, 2, 3, 4].forEach(function (i) { setTimeout(function () { beep(660 + i * 110, 0.15); }, 300 + i * 550); }); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
       default: stopAudio();
@@ -434,7 +451,7 @@
   var lastBeep = null, current = null;
   setInterval(function () {
     var st = current, box = el('countdown');
-    if (!st || st.phase !== 'voting' || !st.endsAt) { box.className = ''; return; }
+    if (!st || (st.phase !== 'voting' && st.phase !== 'veto') || !st.endsAt) { box.className = ''; return; }
     var left = Math.max(0, Math.ceil((st.endsAt - Date.now()) / 1000));
     box.className = 'on' + (left <= 10 ? ' hurry' : '');
     box.textContent = left >= 60 ? Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2) : left;
@@ -451,7 +468,7 @@
   function downStates(down) { var s = {}; (down || []).forEach(function (id) { s[id] = 'down'; }); return s; }
 
   function render(st) {
-    var sig = JSON.stringify([st.phase, st.round, st.joinUrl, st.teamCount, st.answered, st.counts, st.down, st.decision, st.scores, st.closeReason]);
+    var sig = JSON.stringify([st.phase, st.round, st.joinUrl, st.teamCount, st.answered, st.counts, st.down, st.decision, st.scores, st.closeReason, st.teamVotes, st.vetoBy, st.vetoHolders, st.doomed]);
     if (sig === lastSig) return;
     lastSig = sig;
 
@@ -503,15 +520,32 @@
       setBoard(s, false);
     }
 
+    else if (st.phase === 'veto') {
+      el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + '  |  How the room voted';
+      pill('Veto window', true);
+      var tv = st.teamVotes || [];
+      body = '<div class="opts">' + Object.keys(r.options).map(function (L) {
+        var who = tv.filter(function (x) { return x.choice === L; }).map(function (x) { return '<span class="tchip">' + esc(x.name) + '</span>'; }).join('');
+        return '<div class="vrow' + (L === st.decision ? ' win' : '') + '"><span class="L">' + L + '</span><div class="rv-mid"><p class="rv-title">' + esc(r.options[L]) + '</p><div class="tchips">' + (who || '<span class="muted" style="font-size:.9cqw">No tables</span>') + '</div></div></div>';
+      }).join('') + '</div>';
+      body += '<div class="doom">The room goes with <b>' + st.decision + '</b>. If it stands, ' + esc(listNames(st.doomed || [])) + ((st.doomed || []).length === 1 ? ' flips' : ' flip') + ' down.</div>';
+      body += '<div class="vetobox"><b>&#9995; Got a veto left?</b> Use it on your phone now, and tell the room why.<span>' +
+        ((st.vetoHolders || []).length ? 'Vetoes left: ' + esc(st.vetoHolders.join(', ')) : 'Nobody has a veto left.') + '</span></div>';
+      var sv = downStates(down); (st.doomed || []).forEach(function (id) { sv[id] = 'doomed'; });
+      setBoard(sv, false);
+    }
+
     else if (st.phase === 'reveal') {
       el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + '  |  The reveal';
       var dec = st.decision, newly = dec ? r.flips[dec].filter(function (id) { return (st.downBefore || []).indexOf(id) < 0; }) : [];
-      body = '<div class="decision">' + (dec ? 'The room chose <b>' + dec + '</b>. ' + (newly.length ? esc(listNames(newly)) + (newly.length === 1 ? ' flips' : ' flip') + ' down.' : 'Nobody flips down.') : 'No votes this round, so nobody flips down.') + '</div>';
+      if (st.vetoBy) newly = [];
+      body = '<div class="decision' + (st.vetoBy ? ' vetoed' : '') + '">' + (st.vetoBy ? '&#9995; <b>' + esc(st.vetoBy) + '</b> vetoed the room\'s choice of <b>' + dec + '</b>. Nobody flips. ' + (st.vetoBonus ? '<b>+5</b> for a good veto. ' : 'That was the strongest option, so <b>no bonus</b>. ') + esc(st.vetoBy) + ', tell us why.' :
+        dec ? 'The room chose <b>' + dec + '</b>. ' + (newly.length ? esc(listNames(newly)) + (newly.length === 1 ? ' flips' : ' flip') + ' down.' : 'Nobody flips down.') : 'No votes this round, so nobody flips down.') + '</div>';
       body += '<div class="opts">' + Object.keys(r.options).map(function (L) {
         var n = (st.counts && st.counts[L]) || 0, best = L === r.best;
         return '<div class="rv-row' + (best ? ' best' : '') + (L === dec ? ' picked' : '') + '"><span class="L">' + L + '</span>' +
           '<div class="rv-mid"><p class="rv-title">' + esc(r.options[L]) + (best ? '<span class="tag">Strongest</span>' : '') + '</p>' +
-          '<p class="rv-why">' + esc(r.why[L]) + '</p></div>' +
+          '<p class="rv-why">' + esc(r.why[L]) + '</p>' + ((st.teamVotes || []).filter(function (x) { return x.choice === L; }).length ? '<p class="rv-who">' + esc((st.teamVotes || []).filter(function (x) { return x.choice === L; }).map(function (x) { return x.name; }).join(', ')) + '</p>' : '') + '</div>' +
           '<div class="rv-right"><div class="pts">+' + pts(r, L) + '</div><div class="votes">' + n + (n === 1 ? ' table' : ' tables') + '</div></div></div>';
       }).join('') + '</div>';
       body += '<p class="reveal-line">' + esc(r.reveal) + '</p>';

@@ -16,6 +16,9 @@ window.SL_CONFIG = {
   // ---- Discussion and voting time per round, in seconds ----
   votingSeconds: 90,
 
+  // ---- How long tables get to use a veto once the room has decided, in seconds ----
+  vetoSeconds: 20,
+
   // ---- Images and sounds are shared with the Scenarios Game (one folder up) ----
   assets: "../assets/",
   images: { logo: "story-logo.png" },

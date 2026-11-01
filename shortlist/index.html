@@ -132,7 +132,7 @@
   // q is the round number (1 to 5) used for votes; 0 when there is no vote.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }, { phase: 'intro', q: 0, round: -1 }];
   G.rounds.forEach(function (r, ri) {
-    ['dave', 'voting', 'closed', 'reveal', 'learn'].forEach(function (p) { STEPS.push({ phase: p, q: ri + 1, round: ri }); });
+    ['dave', 'voting', 'closed', 'veto', 'reveal', 'learn'].forEach(function (p) { STEPS.push({ phase: p, q: ri + 1, round: ri }); });
   });
   ['f-room', 'f-scores', 'f-shortcut', 'f-spec', 'winner'].forEach(function (p) { STEPS.push({ phase: p, q: 0, round: G.rounds.length - 1 }); });
   var REVEAL_STEP = {};
@@ -149,6 +149,7 @@
       case 'dave': return R + ": Dave's shortcut (" + G.rounds[s.round].title + ')';
       case 'voting': return R + ': discuss and vote';
       case 'closed': return R + ': close voting';
+      case 'veto': return R + ': how the room voted (veto window)';
       case 'reveal': return R + ': reveal';
       case 'learn': return R + ': why it matters';
       case 'f-room': return "Final: the room's shortlist";
@@ -163,7 +164,7 @@
   // ---- State ----
   var sessionId = null, step = 0, teams = [], votes = [], busy = false;
   var cue = { id: 0, at: 0 };
-  var VOTE_MS = (C.votingSeconds || 90) * 1000;
+  var VOTE_MS = (C.votingSeconds || 90) * 1000, VETO_MS = (C.vetoSeconds || 20) * 1000, vetoEndsAt = 0;
   var votingEndsAt = 0, closeReason = 'times-up', ending = false, autoReveal = false, revealFallback = null;
   var musicOn = true, ours = false;
 
@@ -185,6 +186,24 @@
     opts.sort(function (a, b) { return c[b] - c[a] || r.flips[a].length - r.flips[b].length; });
     return opts[0];
   }
+  // ---- Vetoes: each table has one per game. A veto is stored as a vote on question 100 + round. ----
+  // The first veto in a round counts; that round's decision is stopped and nobody flips.
+  function vetoesFor(ri) {
+    return votes.filter(function (v) { return v.q === 101 + ri; })
+      .sort(function (a, b) { return String(a.created_at).localeCompare(String(b.created_at)); });
+  }
+  function vetoTeam(ri) { var v = vetoesFor(ri)[0]; return v ? v.team_id : null; }
+  function teamName(id) { var t = teams.filter(function (x) { return x.id === id; })[0]; return t ? t.name : ''; }
+  function vetoHolders() {
+    var used = {}; votes.forEach(function (v) { if (v.q > 100) used[v.team_id] = 1; });
+    return teams.filter(function (t) { return !used[t.id]; }).map(function (t) { return t.name; });
+  }
+  // Applicants this round's decision would newly flip down.
+  function newlyFlipped(ri) {
+    var dec = decisionFor(ri); if (!dec) return [];
+    var before = downList(Infinity, ri);
+    return G.rounds[ri].flips[dec].filter(function (id) { return before.indexOf(id) < 0; });
+  }
   // Who is flipped down, counting only rounds already revealed (and before round 'beforeRound' if given).
   function downList(uptoStep, beforeRound) {
     var d = {};
@@ -192,7 +211,7 @@
       if (REVEAL_STEP[ri] > uptoStep) return;
       if (beforeRound !== undefined && ri >= beforeRound) return;
       var dec = decisionFor(ri);
-      if (dec) r.flips[dec].forEach(function (id) { d[id] = 1; });
+      if (dec && !vetoTeam(ri)) r.flips[dec].forEach(function (id) { d[id] = 1; });
     });
     return G.applicants.map(function (a) { return a.id; }).filter(function (id) { return d[id]; });
   }
@@ -204,6 +223,11 @@
     votes.forEach(function (v) {
       var ri = v.q - 1, r = G.rounds[ri];
       if (byTeam[v.team_id] && r && REVEAL_STEP[ri] <= step) byTeam[v.team_id].score += pts(r, v.choice);
+    });
+    // A veto that stops anything other than the strongest option earns 5.
+    G.rounds.forEach(function (r, ri) {
+      var vt = vetoTeam(ri);
+      if (vt && byTeam[vt] && REVEAL_STEP[ri] <= step && decisionFor(ri) !== r.best) byTeam[vt].score += 5;
     });
     return Object.keys(byTeam).map(function (k) { return byTeam[k]; })
       .sort(function (a, b) { return b.score - a.score || a.name.localeCompare(b.name); });
@@ -220,10 +244,15 @@
       joinUrl: C.joinUrl, teamCount: teams.length,
       answered: qVotes.length, counts: countsFor(s.q),
       down: downList(step), downBefore: s.round >= 0 ? downList(step, s.round) : [],
-      decision: s.phase === 'reveal' ? decisionFor(s.round) : null,
+      decision: (s.phase === 'reveal' || s.phase === 'veto') ? decisionFor(s.round) : null,
+      teamVotes: s.round >= 0 ? votes.filter(function (v) { return v.q === s.round + 1; }).map(function (v) { return { name: teamName(v.team_id), choice: v.choice }; }) : [],
+      doomed: s.phase === 'veto' ? newlyFlipped(s.round) : [],
+      vetoBy: s.round >= 0 && vetoTeam(s.round) ? teamName(vetoTeam(s.round)) : '',
+      vetoBonus: s.round >= 0 && vetoTeam(s.round) ? decisionFor(s.round) !== G.rounds[s.round].best : false,
+      vetoHolders: vetoHolders(),
       scores: scores,
       winners: scores.filter(function (x) { return x.score === top && top > 0; }).map(function (x) { return x.name; }),
-      cue: cue, endsAt: votingEndsAt, closeReason: closeReason, musicOn: musicOn
+      cue: cue, endsAt: s.phase === 'veto' ? vetoEndsAt : votingEndsAt, closeReason: closeReason, musicOn: musicOn
     };
   }
 
@@ -253,7 +282,7 @@
     busy = true; renderControls();
     var s = STEPS[i];
     var res = await sb.from('sg_state')
-      .update({ step: i, phase: s.phase, q_index: s.q, updated_at: new Date().toISOString() })
+      .update({ step: i, phase: s.phase === 'veto' ? 'voting' : s.phase, q_index: s.phase === 'veto' ? 100 + s.q : s.q, updated_at: new Date().toISOString() })
       .eq('id', 1).select('id');
     busy = false;
     if (res.error || !res.data || !res.data.length) {
@@ -264,6 +293,7 @@
     step = i;
     autoReveal = false; clearTimeout(revealFallback);
     votingEndsAt = s.phase === 'voting' ? Date.now() + VOTE_MS : 0;
+    vetoEndsAt = s.phase === 'veto' ? Date.now() + VETO_MS : 0;
     cue = { id: cue.id + 1, at: Date.now() };
     render(); sendToStage(); poll();
   }
@@ -291,9 +321,21 @@
     if (!autoReveal || STEPS[step].phase !== 'closed') return;
     autoReveal = false;
     await poll(true); // make sure the last votes are in before the board moves
-    goTo(step + 1);
+    // Nothing would flip? Skip the veto window and go straight to the reveal.
+    goTo(newlyFlipped(STEPS[step].round).length ? step + 1 : step + 2);
   }
+  // Veto window: ends on the first veto, or when the time runs out.
+  var leavingVeto = false;
+  setInterval(async function () {
+    var s = STEPS[step];
+    if (s.phase !== 'veto' || leavingVeto || busy) return;
+    await poll(true);
+    var left = Math.max(0, Math.ceil((vetoEndsAt - Date.now()) / 1000));
+    el('timerText').textContent = left + 's to veto';
+    if (vetoTeam(s.round) || left <= 0) { leavingVeto = true; await goTo(step + 1); leavingVeto = false; }
+  }, 1000);
   setInterval(function () {
+    if (STEPS[step].phase === 'veto') return;
     if (STEPS[step].phase !== 'voting' || !votingEndsAt) { el('timerText').textContent = ''; return; }
     var left = Math.max(0, Math.ceil((votingEndsAt - Date.now()) / 1000));
     el('timerText').textContent = left + 's left';
@@ -346,6 +388,12 @@
     if (s.phase === 'join') html = '<p>Tables scan the QR code and join, one phone per table. Press Next when everyone is in.</p>';
     else if (s.phase === 'intro') html = '<p>The board and job card are up. Introduce Dave and the vacancy: whoever the room flips down stays down.</p>';
     else if (FINAL_NOTES[s.phase]) html = '<p>' + esc(FINAL_NOTES[s.phase]) + '</p>';
+    else if (s.phase === 'veto') {
+      var dv = decisionFor(s.round);
+      html = '<p><span class="lbl">The room chose ' + (dv || '-') + '.</span> ' + esc(dv ? r.options[dv] : '') + '</p>' +
+        '<p>Every table\'s choice is on the big screen. Any table with a veto left can stop this from their phone. The window closes on the first veto, or after ' + (VETO_MS / 1000) + ' seconds.</p>' +
+        '<p><span class="lbl">Vetoes left:</span> ' + esc(vetoHolders().join(', ') || 'none') + '</p>';
+    }
     else {
       html += '<p><span class="lbl">Dave:</span> ' + esc(r.dave) + '</p>';
       Object.keys(r.options).forEach(function (L) {
@@ -356,6 +404,7 @@
         html += '<p><span class="lbl">Room chose:</span> ' + (dec || 'no votes') + '</p>';
       }
       html += '<p><span class="lbl">Ask:</span> ' + esc(r.prompt) + '</p>';
+      if (s.phase === 'reveal' && vetoTeam(s.round)) html += '<p><span class="lbl">Vetoed by ' + esc(teamName(vetoTeam(s.round))) + '.</span> Ask them why. ' + (decisionFor(s.round) !== r.best ? 'They stopped a weak call: +5.' : 'They stopped the strongest option: no bonus. Ask the room whether they were right.') + '</p>';
       if (s.phase === 'reveal') html += '<p><span class="lbl">Then ask:</span> Who else does this catch?</p>';
       if (s.phase === 'learn') html += '<p><span class="lbl">On screen:</span> ' + esc(r.learn.head) + '</p><p><span class="lbl">Fair question:</span> ' + esc(r.learn.fair) + '</p>';
       if (r.notes && s.phase !== 'dave') html += '<p><span class="lbl">Notes:</span> ' + esc(r.notes) + '</p>';
@@ -367,14 +416,15 @@
 
   function renderLive() {
     var s = STEPS[step];
-    var showQ = ['voting', 'closed', 'reveal'].indexOf(s.phase) > -1;
+    var showQ = ['voting', 'closed', 'veto', 'reveal'].indexOf(s.phase) > -1;
     var answeredIds = {};
     votes.forEach(function (v) { if (v.q === s.q) answeredIds[v.team_id] = v.choice; });
     el('teamCount').textContent = '(' + teams.length + ')';
     el('answeredCount').textContent = showQ ? Object.keys(answeredIds).length + ' answered' : '';
     el('teamEmpty').style.display = teams.length ? 'none' : 'block';
     el('teamList').innerHTML = teams.map(function (t) {
-      return '<span class="chip' + (showQ && answeredIds[t.id] ? ' done' : '') + '">' + esc(t.name) + '</span>';
+      var hasVeto = vetoHolders().indexOf(t.name) > -1;
+      return '<span class="chip' + (showQ && answeredIds[t.id] ? ' done' : '') + '" title="' + (hasVeto ? 'Veto still to use' : 'Veto used') + '">' + esc(t.name) + (hasVeto ? ' <span style="color:#b00020">&#9995;</span>' : '') + '</span>';
     }).join('');
     var r = G.rounds[s.round];
     if (showQ && r) {
@@ -399,7 +449,7 @@
     try {
       var t = await sb.from('sg_teams').select('id, name, joined_at').eq('session_id', sessionId).order('joined_at', { ascending: true });
       if (t.error) throw t.error;
-      var v = await sb.from('sg_votes').select('team_id, q, choice').eq('session_id', sessionId);
+      var v = await sb.from('sg_votes').select('team_id, q, choice, created_at').eq('session_id', sessionId);
       if (v.error) throw v.error;
       teams = t.data || []; votes = v.data || [];
       setStatus('live');
