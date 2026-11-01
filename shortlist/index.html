@@ -132,7 +132,7 @@
   // q is the round number (1 to 5) used for votes; 0 when there is no vote.
   var STEPS = [{ phase: 'join', q: 0, round: -1 }, { phase: 'intro', q: 0, round: -1 }];
   G.rounds.forEach(function (r, ri) {
-    ['dave', 'voting', 'closed', 'reveal'].forEach(function (p) { STEPS.push({ phase: p, q: ri + 1, round: ri }); });
+    ['dave', 'voting', 'closed', 'reveal', 'learn'].forEach(function (p) { STEPS.push({ phase: p, q: ri + 1, round: ri }); });
   });
   ['f-room', 'f-scores', 'f-shortcut', 'f-spec', 'winner'].forEach(function (p) { STEPS.push({ phase: p, q: 0, round: G.rounds.length - 1 }); });
   var REVEAL_STEP = {};
@@ -150,6 +150,7 @@
       case 'voting': return R + ': discuss and vote';
       case 'closed': return R + ': close voting';
       case 'reveal': return R + ': reveal';
+      case 'learn': return R + ': why it matters';
       case 'f-room': return "Final: the room's shortlist";
       case 'f-scores': return 'Final: show every score';
       case 'f-shortcut': return 'Final: if every shortcut went through';
@@ -332,7 +333,7 @@
   var FINAL_NOTES = {
     'f-room': 'Ask the room: happy with this shortlist? Let a couple of tables answer before you move on.',
     'f-scores': 'Every card shows its score against the job card. Point out who the room lost and why they were strong.',
-    'f-shortcut': "What happens if every one of Dave's shortcuts goes through. Land the affinity bias point: Mark survives because Dave knows him.",
+    'f-shortcut': "What happens if every one of Dave's shortcuts goes through: Danny and Mark, the two applicants most like Dave. Every shortcut sounded reasonable on its own.",
     'f-spec': 'End on the hopeful note: same pile of CVs, different questions. Then ask each table which of these shortcuts they have heard on a real shortlist, and one change each person will make.',
     'winner': 'Final scores. Scores are for the game, not an assessment of anyone.'
   };
@@ -356,6 +357,8 @@
       }
       html += '<p><span class="lbl">Ask:</span> ' + esc(r.prompt) + '</p>';
       if (s.phase === 'reveal') html += '<p><span class="lbl">Then ask:</span> Who else does this catch?</p>';
+      if (s.phase === 'learn') html += '<p><span class="lbl">On screen:</span> ' + esc(r.learn.head) + '</p><p><span class="lbl">Fair question:</span> ' + esc(r.learn.fair) + '</p>';
+      if (r.notes && s.phase !== 'dave') html += '<p><span class="lbl">Notes:</span> ' + esc(r.notes) + '</p>';
     }
     el('nowBox').innerHTML = html;
     renderControls();

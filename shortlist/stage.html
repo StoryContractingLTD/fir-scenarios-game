@@ -31,7 +31,9 @@
   /* Join */
   #v-join { flex-direction:row; align-items:center; gap:4cqw; }
   .join-left { flex:1; }
-  .game-title { font-size:5.4cqw; font-weight:800; color:var(--blue); margin:0 0 1.2cqw; line-height:1; }
+  .game-title { margin:0 0 1.6cqw; line-height:0; }
+  .game-title img { width:44cqw; max-width:100%; filter:drop-shadow(0 .5cqw .8cqw rgba(0,40,80,.25)); animation:logoIn 1s cubic-bezier(.3,1.5,.5,1) both; }
+  @keyframes logoIn { 0% { transform:scale(.6) rotate(-4deg); opacity:0; } 100% { transform:none; opacity:1; } }
   .game-sub { font-size:1.8cqw; line-height:1.45; margin:0; max-width:44cqw; }
   .join-right { display:flex; flex-direction:column; align-items:center; text-align:center; }
   .qr-card { background:#fff; border:.3cqw solid var(--blue); border-radius:1.4cqw; padding:1cqw; }
@@ -108,6 +110,33 @@
   .slot.lit .score { background:var(--green); border-color:var(--green); color:#fff; }
   @media (prefers-reduced-motion: reduce) { .tile, .score, .cover { transition:none; } .slot.hot .frame { animation:none; } }
 
+  /* Livelier movement */
+  .tray.thud { animation:thud .32s ease-out; }
+  @keyframes thud { 0% { transform:translateY(0); } 30% { transform:translateY(.35cqw); } 60% { transform:translateY(-.12cqw); } 100% { transform:translateY(0); } }
+  .dust { position:absolute; left:-10%; right:-10%; bottom:.6cqw; height:3cqw; pointer-events:none; opacity:0; z-index:2;
+    background:radial-gradient(ellipse at 50% 70%, rgba(255,255,255,.75) 0%, rgba(200,220,240,.45) 35%, rgba(255,255,255,0) 70%); }
+  @keyframes puff { 0% { opacity:0; transform:scale(.4, .3); } 20% { opacity:1; } 100% { opacity:0; transform:scale(1.5, 1.2) translateY(-1.2cqw); } }
+  .slot.hot .frame { animation:hot 1.4s ease-in-out infinite, wobble 2.8s ease-in-out infinite; transform-origin:50% 100%; }
+  @keyframes wobble { 0%, 70%, 100% { transform:rotate(0); } 74% { transform:rotate(-2deg); } 78% { transform:rotate(2deg); } 82% { transform:rotate(-1.4deg); } 86% { transform:rotate(1deg); } 90% { transform:rotate(0); } }
+  .stamp { position:absolute; left:50%; top:38%; z-index:4; pointer-events:none; opacity:0; white-space:nowrap;
+    font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.05cqw; letter-spacing:.08cqw; text-transform:uppercase;
+    color:#fff; background:var(--green); border:.2cqw solid #fff; border-radius:.4cqw; padding:.3cqw .6cqw; box-shadow:0 .3cqw .8cqw rgba(0,0,0,.35);
+    transform:translate(-50%, -50%) rotate(-12deg) scale(2.4); }
+  .slot.lit .stamp { animation:stampIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes stampIn { 0% { opacity:0; transform:translate(-50%, -50%) rotate(-12deg) scale(2.4); } 100% { opacity:1; transform:translate(-50%, -50%) rotate(-12deg) scale(1); } }
+  .slot.lit .tile { transform:translateY(-.5cqw); }
+  .slot.show-score .score { transition:opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1); }
+
+  /* Why it matters */
+  .learn-head { font-family:'Montserrat', Arial, sans-serif; font-size:1.75cqw; font-weight:800; color:var(--ink); line-height:1.25; margin:.3cqw 0 1cqw; }
+  .learn { list-style:none; margin:0 0 1cqw; padding:0; display:flex; flex-direction:column; gap:.7cqw; }
+  .learn li { position:relative; padding-left:1.6cqw; font-size:1.18cqw; line-height:1.4; animation:fadeUp .5s ease-out both; }
+  .learn li::before { content:""; position:absolute; left:0; top:.45cqw; width:.75cqw; height:.75cqw; border-radius:50%; background:var(--blue); }
+  .learn li:nth-child(2) { animation-delay:.25s; } .learn li:nth-child(3) { animation-delay:.5s; }
+  @keyframes fadeUp { 0% { opacity:0; transform:translateY(.8cqw); } 100% { opacity:1; transform:none; } }
+  .fairq { margin-top:auto; background:var(--green-pale); border-left:.45cqw solid var(--green); border-radius:0 .8cqw .8cqw 0; padding:.8cqw 1cqw; font-size:1.3cqw; font-weight:700; line-height:1.35; color:var(--ink); animation:fadeUp .5s ease-out .8s both; }
+  .fairq span { display:block; font-family:'Montserrat', Arial, sans-serif; font-size:.9cqw; font-weight:800; letter-spacing:.12cqw; text-transform:uppercase; color:var(--green); margin-bottom:.3cqw; }
+
   /* Left panel pieces */
   .bubble { position:relative; background:var(--blue); color:#fff; border-radius:1.2cqw; padding:1.1cqw 1.3cqw; margin:.6cqw 0 1.1cqw; }
   .bubble::after { content:""; position:absolute; left:2.4cqw; bottom:-1.1cqw; border:.6cqw solid transparent; border-top:.6cqw solid var(--blue); border-left:.6cqw solid var(--blue); }
@@ -156,7 +185,7 @@
 
   /* Start overlay */
   #start { position:fixed; inset:0; background:var(--blue); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
-  #start img { width:min(50vw, 700px); }
+  #start img { width:min(56vw, 820px); filter:drop-shadow(0 1vw 2vw rgba(0,0,0,.3)); }
   #start button { margin-top:4vh; font-size:clamp(18px, 2.2vw, 32px); font-weight:800; padding:1.1vw 3vw; border-radius:999px; border:none; background:#fff; color:var(--blue); cursor:pointer; }
   #start p { color:#cfe2f3; font-size:clamp(13px, 1.1vw, 18px); margin-top:2vh; }
   .hide { display:none !important; }
@@ -171,7 +200,7 @@
       <section id="v-join">
         <div class="join-left">
           <p class="eyebrow">Shortlisting activity</p>
-          <h1 class="game-title" id="gameTitle"></h1>
+          <h1 class="game-title"><img id="gameLogo" alt=""></h1>
           <p class="muted game-sub" id="gameSub"></p>
         </div>
         <div class="join-right">
@@ -203,7 +232,7 @@
   </div>
 
   <div id="start">
-    <img id="startLogo" alt="Story">
+    <img id="startLogo" alt="Who's Left Standing?">
     <button id="startBtn">Click to start</button>
     <p>Drag this window onto the projector first. This click turns the sound on and goes full screen.</p>
   </div>
@@ -212,10 +241,10 @@
   var C = window.SL_CONFIG, G = window.SL_GAME, S = C.sounds;
   var IMG = C.assets + 'images/', AUD = C.assets + 'audio/';
   var el = function (id) { return document.getElementById(id); };
-  el('gameTitle').textContent = G.title;
+  el('gameLogo').src = 'assets/logo.png'; el('gameLogo').alt = G.title;
   el('gameSub').textContent = G.subtitle;
   el('barLogo').src = IMG + C.images.logo;
-  el('startLogo').src = IMG + C.images.logo;
+  el('startLogo').src = 'assets/logo.png';
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   var byId = {}; G.applicants.forEach(function (a) { byId[a.id] = a; });
   function first(id) { return byId[id].name.split(' ')[0]; }
@@ -320,21 +349,45 @@
       '<div class="tile"><div class="frame"><div class="card"><div class="art">' + avatar(a, i) + '</div>' +
       '<div class="plate">' + esc(a.name.split(' ')[0]) + '</div>' +
       '<div class="info"><div class="ln">' + esc(a.card) + '</div><div class="ps">' + esc(a.personal) + '</div></div></div>' +
-      '<div class="cover">STORY</div></div></div>' +
-      '<div class="score">' + a.score + '</div></div>';
+      '<div class="cover">STORY</div><div class="stamp">Shortlisted</div></div></div>' +
+      '<div class="dust"></div><div class="score">' + a.score + '</div></div>';
   }).join('');
 
   // Applicants in order of their job card score: the shortlist the job card would pick.
   var SPEC_TOP = G.applicants.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 5).map(function (a) { return a.id; });
   var ALL_SHORTCUTS = {};
-  G.rounds.forEach(function (r) { var worst = Object.keys(r.flips).sort(function (a, b) { return r.flips[b].length - r.flips[a].length; })[0]; r.flips[worst].forEach(function (id) { ALL_SHORTCUTS[id] = 1; }); });
+  G.rounds.forEach(function (r) { (r.flips[r.shortcut] || []).forEach(function (id) { ALL_SHORTCUTS[id] = 1; }); });
 
   // card states: { id: 'down' | 'out' | 'lit' | 'hot' | '' }, plus whether scores show
-  function setBoard(states, showScores) {
-    document.querySelectorAll('.slot').forEach(function (c) {
-      var st = states[c.getAttribute('data-id')] || '';
+  // Tiles that change state go one after another: falls land with a thud and a puff of dust,
+  // score badges pop in turn, and shortlisted tiles get stamped one by one.
+  var thudTimers = [];
+  function setBoard(states, showScores, order) {
+    thudTimers.forEach(clearTimeout); thudTimers = [];
+    var falling = 0, rising = 0, popping = 0, stamping = 0;
+    var slots = Array.prototype.slice.call(document.querySelectorAll('.slot'));
+    if (order) slots.sort(function (a, b) { return order.indexOf(a.getAttribute('data-id')) - order.indexOf(b.getAttribute('data-id')); });
+    slots.forEach(function (c) {
+      var id = c.getAttribute('data-id'), st = states[id] || '', was = c.getAttribute('data-st') || '';
+      var tile = c.querySelector('.tile'), score = c.querySelector('.score'), stamp = c.querySelector('.stamp'), dust = c.querySelector('.dust');
+      var goingDown = st === 'down' && was !== 'down', goingUp = was === 'down' && st !== 'down';
+      var d = 0;
+      if (goingDown) {
+        d = 0.15 + falling++ * 0.45;
+        dust.style.animation = 'none'; void dust.offsetWidth;
+        dust.style.animation = 'puff .9s ease-out ' + (d + 0.62) + 's both';
+        thudTimers.push(setTimeout(thud, (d + 0.62) * 1000));
+      } else if (goingUp) d = rising++ * 0.18;
+      tile.style.transitionDelay = d + 's';
+      score.style.transitionDelay = showScores && c.className.indexOf('show-score') < 0 ? (popping++ * 0.09) + 's' : '0s';
+      if (stamp) stamp.style.animationDelay = st === 'lit' ? (0.3 + stamping++ * 0.55) + 's' : '0s';
+      c.setAttribute('data-st', st);
       c.className = 'slot' + (st ? ' ' + st : '') + (showScores ? ' show-score' : '');
     });
+  }
+  function thud() {
+    var t = el('grid'); t.classList.remove('thud'); void t.offsetWidth; t.classList.add('thud');
+    if (started) beep(110, 0.12);
   }
   function setJob(i) {
     document.querySelectorAll('.jchip').forEach(function (c) { c.classList.toggle('lit', i !== null && i !== undefined && +c.getAttribute('data-j') === i); });
@@ -371,6 +424,7 @@
       case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
       case 'closed': stopAudio(); beep(523, 0.25); setTimeout(function () { report('closed-done'); }, 1500); break;
       case 'reveal': stopAudio(); beep(784, 0.3); break;
+      case 'f-spec': stopAudio(); [0, 1, 2, 3, 4].forEach(function (i) { setTimeout(function () { beep(660 + i * 110, 0.15); }, 300 + i * 550); }); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
       default: stopAudio();
     }
@@ -443,7 +497,7 @@
       body = bubble(r.dave) + '<div class="opts">' + Object.keys(r.options).map(function (L) {
         return '<div class="opt"><span class="L">' + L + '</span><span>' + esc(r.options[L]) + '</span></div>';
       }).join('') + '</div>';
-      body += '<p class="lp-foot">' + (st.phase === 'dave' ? 'Highlighted: who this shortcut would remove' : st.answered + ' of ' + st.teamCount + (st.teamCount === 1 ? ' table has' : ' tables have') + ' voted') + '</p>';
+      body += '<p class="lp-foot">' + (st.phase === 'dave' ? 'Highlighted: who could flip down this round' : st.answered + ' of ' + st.teamCount + (st.teamCount === 1 ? ' table has' : ' tables have') + ' voted') + '</p>';
       var s = downStates(down);
       Object.keys(r.flips).forEach(function (L) { r.flips[L].forEach(function (id) { if (!s[id]) s[id] = 'hot'; }); });
       setBoard(s, false);
@@ -461,6 +515,15 @@
           '<div class="rv-right"><div class="pts">+' + pts(r, L) + '</div><div class="votes">' + n + (n === 1 ? ' table' : ' tables') + '</div></div></div>';
       }).join('') + '</div>';
       body += '<p class="reveal-line">' + esc(r.reveal) + '</p>';
+      setBoard(downStates(down), false);
+      setJob(r.job);
+    }
+
+    else if (st.phase === 'learn') {
+      el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + '  |  Why it matters';
+      var L2 = r.learn || {};
+      body = '<p class="learn-head">' + esc(L2.head || '') + '</p><ul class="learn">' + (L2.points || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+        (L2.fair ? '<div class="fairq"><span>A fairer question, for everyone</span>\u201C' + esc(L2.fair) + '\u201D</div>' : '');
       setBoard(downStates(down), false);
       setJob(r.job);
     }
@@ -494,7 +557,7 @@
         '<div class="stat"><div class="warn"><b>' + topGone + ' of 5</b>top applicants gone</div><div class="warn"><b>' + womenLeft + '</b>' + (womenLeft === 1 ? 'woman left' : 'women left') + '</div></div>' +
         bubble(G.final.shortcutDave) + '<p class="lp-text" style="margin-top:auto;margin-bottom:0">' + esc(G.final.shortcutNote) + '</p>';
       var s3 = {}; Object.keys(ALL_SHORTCUTS).forEach(function (id) { s3[id] = 'down'; });
-      setBoard(s3, true);
+      setBoard(s3, true, G.applicants.slice().sort(function (a, b) { return b.score - a.score; }).map(function (a) { return a.id; }));
     }
 
     else if (st.phase === 'f-spec') {
@@ -503,7 +566,7 @@
         '<p class="names">' + SPEC_TOP.map(function (id) { return '<b>' + esc(byId[id].name) + '</b> ' + byId[id].score; }).join('<br>') + '</p>' +
         '<p class="tagline">' + esc(G.final.tagline) + '</p>';
       var s4 = {}; G.applicants.forEach(function (a) { s4[a.id] = SPEC_TOP.indexOf(a.id) > -1 ? 'lit' : 'out'; });
-      setBoard(s4, true);
+      setBoard(s4, true, SPEC_TOP);
     }
 
     el('lpBody').innerHTML = body;

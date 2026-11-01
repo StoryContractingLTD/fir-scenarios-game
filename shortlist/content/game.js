@@ -1,21 +1,30 @@
 // =====================================================================
 // Who's Left Standing? The content
 // Edit the words here. Keep the structure (ids, letters, brackets) as it is.
-// flips: which applicants that option flips down if the room picks it.
-// best: the strongest option (10 points). The other two score 5.
-// job: which job card line lights up at the reveal (0 = first line, or null).
+// Each round:
+//   dave      what Dave says
+//   options   A, B, C as they appear on the phones
+//   best      the strongest option (10 points). The other two score 5.
+//   shortcut  the option that is Dave's suggestion (used for the final reveal)
+//   flips     which applicants each option flips down if the room picks it
+//   why       one line per option, shown at the reveal
+//   job       which job card line lights up at the reveal (0 = first line, or null)
+//   reveal    one line under the options at the reveal
+//   learn     the "Why it matters" screen: a headline, two or three points, and the fair question
+//   prompt    what the facilitator asks (control panel only)
+//   notes     facilitator only (control panel only)
 // =====================================================================
 window.SL_GAME = {
   title: "Who's Left Standing?",
-  subtitle: "Twelve applicants. One vacancy. Five shortcuts from a busy hiring manager. Your table decides which ones the room takes.",
+  subtitle: "Twelve applicants. One vacancy. Eight shortcuts from a busy hiring manager. Your table decides which ones the room takes.",
   manager: "Dave",
   role: "Quantity Surveyor",
 
   job: [
     "Full UK driving licence",
     "Cost and contract experience, any sector",
-    "QS qualified or working towards it",
-    "Strong with numbers",
+    "QS qualified or studying for it",
+    "Clear communicator",
     "Month-end dates set in advance",
     "Desirable: NEC, rail experience"
   ],
@@ -56,8 +65,8 @@ window.SL_GAME = {
       behind: "Qualified, licence. Gap was recovery from serious illness, which he chose not to disclose",
       look: { eyes: "#5b8fb0", skin: "#f2c9a8", hair: "#b5651d", style: "short", outfit: "jumper", top: "#3f6e4a" } },
     { id: "steven", name: "Steven Bell", sex: "m", score: 6,
-      card: "QS, 4 years", personal: "Plays darts",
-      behind: "Qualified, licence, some rail experience",
+      card: "QS, 4 years", personal: "Asked for the interview questions in writing",
+      behind: "Qualified, licence, some rail experience. Asked for a common interview adjustment",
       look: { skin: "#e9b995", hair: "#2a2a2a", style: "bald", outfit: "polo", top: "#2b4c7e", glasses: true, beard: "stubble" } },
     { id: "mark", name: "Mark Hutchinson", sex: "m", score: 5,
       card: "Site engineer, 15 years", personal: "Rugby club captain",
@@ -78,98 +87,232 @@ window.SL_GAME = {
       dave: "Too many CVs. Anyone with a gap of more than a year, out. They've lost touch.",
       options: {
         A: "Fair enough, flip them down",
-        B: "Keep them in, and ask about the gap at interview if it matters",
-        C: "Only keep the ones who explained their gap on the CV"
+        B: "Only keep the ones who explained their gap on the CV",
+        C: "Keep them all in, and at interview ask everyone about their recent experience"
       },
-      best: "B",
-      flips: { A: ["rachel", "kwame", "tom"], B: [], C: ["tom"] },
+      best: "C", shortcut: "A",
+      flips: { A: ["rachel", "kwame", "tom"], B: ["tom"], C: [] },
       why: {
-        A: "Cuts a parent, an ex-Forces leaver and someone recovering from illness. None of that says they can't do the job.",
-        B: "A gap is a question for interview, not a reason to cut.",
-        C: "Sounds fair, but it punishes Tom for keeping his health private, which he had every right to do."
+        A: "Cuts a parent, a Forces leaver and someone recovering from illness. None of that says they can't do this job.",
+        B: "Sounds fair, but it punishes Tom for keeping his health private, which he's entitled to do.",
+        C: "Same question for everyone. Nobody is singled out for having a life outside work."
       },
       job: null,
-      reveal: "Behind the gaps: raising children, leaving the Forces, recovering from illness.",
-      prompt: "Who's more likely to have a gap, and why? Does a gap tell you anything about whether someone can do this job?" },
+      reveal: "Behind the three gaps: raising children, leaving the Forces, recovering from illness.",
+      learn: {
+        head: "A gap tells you something happened. It doesn't tell you what someone can do.",
+        points: [
+          "Career breaks are more common among women, mostly because of caring for children or relatives.",
+          "Health questions before a job offer are restricted by the Equality Act, with narrow exceptions such as asking about adjustments for the interview.",
+          "Who else it catches: Forces leavers, carers of any gender, people made redundant, people who've been ill."
+        ],
+        fair: "What have you done recently that shows you can do this job?"
+      },
+      prompt: "Who's more likely to have a gap, and why? Was B fair to Tom?",
+      notes: "Expect B to split the room: it feels like a reasonable compromise. Push on why Tom should have to explain." },
 
     { title: "Full-time and on call",
       dave: "I need someone who's full-time now and can stay late whenever month-end hits.",
       options: {
-        A: "Flip down anyone not currently full-time",
-        B: "Check the job card: month-end dates are set in advance, so current hours aren't the test",
-        C: "Keep them in, but note them as \"less committed\""
+        A: "Check the job card: month-end dates are set in advance, so current hours aren't the test",
+        B: "Keep them in, but ask Rachel and Joanne at interview if they could go full-time",
+        C: "Flip down anyone who isn't full-time right now"
       },
-      best: "B",
-      flips: { A: ["rachel", "joanne"], B: [], C: [] },
+      best: "A", shortcut: "C",
+      flips: { A: [], B: [], C: ["rachel", "joanne"] },
       why: {
-        A: "Current hours aren't on the job card. This cuts two strong QSs.",
-        B: "The job never needed \"drop everything\". Joanne's compressed week already fits it.",
-        C: "Keeps them on paper, but labels them before anyone has met them."
+        A: "The job never needed \"drop everything\". Joanne's compressed week already fits it.",
+        B: "Keeps them in, but only the part-timers get the extra question. That's singling them out.",
+        C: "Current hours aren't on the job card. This cuts two strong QSs."
       },
       job: 4,
       reveal: "Month-end dates are set in advance. Joanne's compressed week already fits the role.",
-      prompt: "Was Dave describing the job, or describing how he's always worked?" },
+      learn: {
+        head: "Was Dave describing the job, or how he's always worked?",
+        points: [
+          "Most part-time workers in the UK are women, so a \"full-time now\" rule falls hardest on them.",
+          "Since April 2024, employees can ask for flexible working from their first day in a job.",
+          "Who else it catches: carers, disabled people, older workers easing down."
+        ],
+        fair: "These are the hours and month-end dates the job needs. Can you work them?"
+      },
+      prompt: "Was Dave describing the job, or how he's always worked? What's wrong with B if it's asked politely?",
+      notes: "B is the trap: it sounds reasonable, but only two applicants get the question, and both are women." },
 
     { title: "The licence",
       dave: "This role is out on sites across Cumbria for measures and valuations. No licence, no shortlist.",
       options: {
-        A: "Apply it, it's essential on the job card",
-        B: "Keep Lee in, he's too good to lose",
-        C: "Keep them both in and see if they'd get one"
+        A: "Keep them both in and see if they'd get one",
+        B: "Apply it to everyone: it's essential on the job card",
+        C: "Keep Lee in, he's too good to lose"
       },
-      best: "A",
-      flips: { A: ["lee", "aisha"], B: ["aisha"], C: [] },
+      best: "B", shortcut: "B",
+      flips: { A: [], B: ["lee", "aisha"], C: ["aisha"] },
       why: {
-        A: "This one is fair: it's on the job card, linked to the job and applied to everyone the same.",
-        B: "Bending the rule for someone we rate is bias too. Aisha goes, Lee stays.",
-        C: "If it's essential, it applies to everyone. If it isn't, take it off the job card."
+        A: "If it's essential, it applies to everyone. If it isn't, take it off the job card.",
+        B: "Fair: it's on the job card, linked to the job and applied to everyone the same.",
+        C: "Bending the rule for someone we rate is bias too. Aisha goes, Lee stays."
       },
       job: 0,
-      reveal: "A fair filter: in the spec, linked to the job, applied the same to everyone.",
-      prompt: "What makes this one different from the last two? If someone couldn't drive because of a disability, what might change?" },
+      reveal: "This time Dave's shortcut is fair. Did your table trust it, or push back out of habit?",
+      learn: {
+        head: "Not every filter is bias. The test is whether it's needed, linked to the job and applied to everyone.",
+        points: [
+          "Option C is the bias in this round: keeping the rule for Aisha but not for Lee.",
+          "Worth asking when the job card is written: is a licence the need, or is getting to sites the need?",
+          "If a disabled applicant can't drive, the employer has to consider reasonable adjustments."
+        ],
+        fair: "Does every essential criterion on this job card describe something the job really needs?"
+      },
+      prompt: "What makes this different from the last two rounds? What if someone couldn't drive because of a disability?",
+      notes: "Watch for tables picking A out of habit after two rounds of pushing back. That's the point of this round." },
 
     { title: "A proper construction background",
       dave: "Ten years in construction minimum. Someone from a factory isn't going to understand a rail job.",
       options: {
-        A: "Apply it: 10 years in construction minimum",
-        B: "Test against the job card: cost and contract experience in any sector counts",
-        C: "Meet him halfway at 5 years in construction"
+        A: "Meet him halfway at 5 years in construction",
+        B: "Apply it: 10 years in construction minimum",
+        C: "Test against the job card: cost and contract experience in any sector counts"
       },
-      best: "B",
-      flips: { A: ["priya", "sophie", "hannah", "steven", "kwame", "aisha"], B: [], C: ["priya", "sophie", "steven", "kwame", "aisha"] },
+      best: "C", shortcut: "B",
+      flips: { A: ["priya", "sophie", "steven", "kwame", "aisha"], B: ["priya", "sophie", "hannah", "steven", "kwame", "aisha"], C: [] },
       why: {
-        A: "Construction years aren't on the job card. Six applicants gone, including Hannah and Priya.",
-        B: "Cost and contract experience counts wherever it was earned.",
-        C: "Halfway to a rule the job doesn't need is still a rule the job doesn't need."
+        A: "Halfway to a rule the job doesn't need is still a rule the job doesn't need.",
+        B: "Construction years aren't on the job card. Six applicants gone, including Hannah and Priya.",
+        C: "Cost and contract experience counts wherever it was earned."
       },
       job: 1,
-      reveal: "Priya has spent 8 years managing budgets, supplier contracts and variations, and is studying for her QS degree.",
-      prompt: "Who has had an unbroken, construction-only career? Who's had to take the long way round?" },
+      reveal: "Priya has 8 years managing budgets, supplier contracts and variations, and is studying for her QS degree.",
+      learn: {
+        head: "Years in the industry is a stand-in. Ask what it's meant to prove, then test that.",
+        points: [
+          "A long minimum shuts out younger applicants, people with career breaks and anyone changing sector.",
+          "Construction has fewer women than most industries, so \"construction years only\" narrows the pool further.",
+          "Kwame ran works budgets in the Royal Engineers. Is that really less relevant than ten years on a site?"
+        ],
+        fair: "Tell me about a contract or budget you managed, and how you handled a variation."
+      },
+      prompt: "Who has had an unbroken, construction-only career? Who's had to take the long way round?",
+      notes: "A will feel like a sensible compromise. Ask what five years proves that the job card doesn't already test." },
+
+    { title: "Will clients understand her?",
+      dave: "I gave Priya a quick ring. Strong accent. Clients need to understand their QS, so she's out.",
+      options: {
+        A: "Judge what she said, not how she sounded: did she explain things clearly?",
+        B: "Keep her in, but give her a written test nobody else gets",
+        C: "Dave's right, clear communication is on the job card. Flip her down"
+      },
+      best: "A", shortcut: "C",
+      flips: { A: [], B: [], C: ["priya"] },
+      why: {
+        A: "Clear communication is about being understood and explaining well. An accent isn't a lack of clarity.",
+        B: "Keeps her in, but a test only she has to sit is treating her differently.",
+        C: "It sounds like the job card, but it's judging how she sounds, not what she said."
+      },
+      job: 3,
+      reveal: "Did anyone else get a phone call from Dave? Or only Priya?",
+      learn: {
+        head: "\"Clear communicator\" is on the job card. That's what makes this one easy to get wrong.",
+        points: [
+          "An accent usually points to where someone's from. Race in the Equality Act includes nationality and ethnic or national origins.",
+          "If only some applicants get a phone screen, the process isn't the same for everyone.",
+          "Who else it catches: regional accents, people with speech differences, anyone who sounds \"not from round here\"."
+        ],
+        fair: "Walk me through how you'd explain a cost overrun to a client."
+      },
+      prompt: "Is this about clarity, or about how someone sounds? Would a broad Cumbrian accent get the same treatment?",
+      notes: "Expect some tables to defend C because communication is on the job card. Ask them how Dave measured it, and whether anyone else was rung." },
+
+    { title: "Help at interview",
+      dave: "Steven wants the questions in writing at interview. If he needs help to get through an interview, he'll need help doing the job.",
+      options: {
+        A: "Same process for everyone: no special treatment, that's fairest",
+        B: "Give him the questions in writing, and assess him on the job card like everyone else",
+        C: "Flip him down: if he needs help now, he'll struggle on the job"
+      },
+      best: "B", shortcut: "C",
+      flips: { A: ["steven"], B: [], C: ["steven"] },
+      why: {
+        A: "Sounds fair, but a spoken-only interview tests the format, not the QS. Steven is marked down.",
+        B: "Removes a barrier that has nothing to do with the job, then holds him to the same standard.",
+        C: "An interview adjustment says nothing about how he'd do the job."
+      },
+      job: null,
+      reveal: "Questions in writing is a common, low-cost interview adjustment.",
+      learn: {
+        head: "Treating everyone identically isn't always treating them fairly.",
+        points: [
+          "Employers have a legal duty to make reasonable adjustments for disabled applicants, including at interview.",
+          "Asking applicants what adjustments they need for the interview is one of the questions the law allows before an offer.",
+          "Many people never ask for an adjustment because they worry it'll count against them. This round is why."
+        ],
+        fair: "Is there anything we can do to help you show us your best at interview?"
+      },
+      prompt: "Why does \"same process for everyone\" feel fair? Who does it leave out?",
+      notes: "A is the strong trap: tables will defend it as fairness. Keep the focus on what the interview is meant to test." },
 
     { title: "Will she settle?",
       dave: "Hannah's just moved up with two young kids. She'll be wanting time off and probably won't stick it. Same with Rachel.",
       options: {
-        A: "Fair point, flip them down",
-        B: "Keep them in, family isn't on the job card",
-        C: "Keep them in, but ask them about childcare at interview"
+        A: "Keep them in, but ask them about childcare at interview",
+        B: "Fair point, flip them down",
+        C: "Keep them in, and ask every applicant about the hours and travel the job needs"
       },
-      best: "B",
-      flips: { A: ["hannah", "rachel"], B: [], C: [] },
+      best: "C", shortcut: "B",
+      flips: { A: [], B: ["hannah", "rachel"], C: [] },
       why: {
-        A: "Assuming a mum won't stay is sex discrimination.",
-        B: "Family isn't on the job card. Danny's card mentions his son too, and Dave didn't blink.",
-        C: "Feels reasonable, but asking only women about childcare is the classic trap."
+        A: "Feels reasonable, but asking only the mums about childcare is the classic trap.",
+        B: "Assuming a mum won't stay is an assumption about her sex, not evidence about her.",
+        C: "Asks about what the job needs, of everyone. That's the information Dave actually needs."
       },
       job: null,
       reveal: "Danny's card mentions his son too. Nobody asked about his childcare.",
-      prompt: "Would Dave have said this about a man who'd just moved with his family? Where do these assumptions come from?" }
+      learn: {
+        head: "Dave thinks he's predicting the future. He's making an assumption about women.",
+        points: [
+          "Sex, and pregnancy and maternity, are protected characteristics. Turning someone down for being a mum is discrimination.",
+          "Studies sending out identical CVs have found mothers rated as less committed, while fathers weren't marked down.",
+          "Hannah has just moved here with her family. That could just as easily mean she's the one most likely to stay."
+        ],
+        fair: "The job needs these hours and this travel. Is that something you can do?"
+      },
+      prompt: "Would Dave have said this about a man who'd just moved with his family? Where do these assumptions come from?",
+      notes: "Research reference if challenged: Correll, Benard and Paik (2007), 'Getting a Job: Is There a Motherhood Penalty?'. Use it as a pointer, not a statistic." },
+
+    { title: "One of ours",
+      dave: "Mark's a good lad, I know him from rugby. Put him straight through to interview, he'll pick up the QS side.",
+      options: {
+        A: "Hold him to the same job card: he doesn't meet the essentials yet, so he doesn't go through",
+        B: "Put him through, he's a known quantity",
+        C: "Give him a courtesy interview, it's only one slot"
+      },
+      best: "A", shortcut: "B",
+      flips: { A: ["mark"], B: [], C: [] },
+      why: {
+        A: "Same standard for everyone, including people we like. If Mark wants a route into QS, offer it openly.",
+        B: "\"Known quantity\" usually means \"like me\". That's affinity bias.",
+        C: "A courtesy slot is one somebody else on the job card didn't get."
+      },
+      job: 2,
+      reveal: "Mark has no QS qualification and no commercial experience. He's a good site engineer, not yet a QS.",
+      learn: {
+        head: "Affinity bias: we rate people higher when they remind us of ourselves.",
+        points: [
+          "It rarely feels like bias. It feels like trust, or a good feeling about someone.",
+          "If the shortlist comes from the manager's network, it tends to look like the manager's network. Construction's workforce is still mostly men.",
+          "Saying no to Mark here isn't saying no to Mark. A trainee QS route, offered openly, is a different conversation."
+        ],
+        fair: "Does this applicant meet the essential criteria, judged the same way as everyone else?"
+      },
+      prompt: "Why does this one feel different from the others? Have you ever been the Mark in this story?",
+      notes: "C will be popular: it feels generous. Ask who loses out when the courtesy slot goes to Mark." }
   ],
 
   final: {
     roomAsk: "Happy with this shortlist?",
     shortcutHead: "If every one of Dave's shortcuts had gone through",
-    shortcutDave: "Mark's a good lad, I know him from rugby.",
-    shortcutNote: "That's affinity bias: the quiet one that never needed a round.",
+    shortcutDave: "Danny and Mark. Couldn't have picked better myself.",
+    shortcutNote: "Every shortcut sounded reasonable on its own. Together, they built a shortlist that looks just like Dave.",
     tagline: "Same pile of CVs. Different questions."
   }
 };
