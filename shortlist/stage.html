@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who's Left Standing?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="content/game.js"></script>
+<style>
+  :root { --blue:#0061ad; --blue-dark:#004e8c; --blue-pale:#e9f1f9; --ink:#2b2f33; --grey:#60666d; --line:#dee0e1; --amber:#f2a900; --amber-pale:#fff6dd; --green:#1f9d57; --green-pale:#e3f6ea; --white:#ffffff; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; background:#dfe4ea; overflow:hidden; }
+  body { font-family:Arial, Helvetica, sans-serif; color:var(--ink); display:flex; align-items:center; justify-content:center; }
+  h1, h2, .eyebrow, .pill, .L, .pts, .tag, button, .nm, .bubble-who, .jlab, .score { font-family:'Montserrat', Arial, sans-serif; }
+  #stage { position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16 / 9; container-type:inline-size; overflow:hidden; background:var(--white); display:flex; flex-direction:column; }
+  .bar { flex:0 0 auto; background:var(--blue); height:6cqw; display:flex; align-items:center; justify-content:space-between; padding:0 3cqw 0 0; }
+  .bar img { height:100%; }
+  .bar span { color:#cfe2f3; font-family:'Montserrat', Arial, sans-serif; font-weight:700; font-size:1.2cqw; letter-spacing:.25cqw; text-transform:uppercase; }
+  #panel { flex:1; min-height:0; display:flex; flex-direction:column; padding:1.8cqw 3cqw 1.8cqw; }
+  section { display:none; flex:1; flex-direction:column; min-height:0; }
+  section.on { display:flex; }
+  .center { align-items:center; justify-content:center; text-align:center; }
+  .eyebrow { font-weight:700; text-transform:uppercase; letter-spacing:.25cqw; font-size:1.05cqw; color:var(--blue); margin:0 0 .6cqw; }
+  .muted { color:var(--grey); }
+  .big-head { font-size:2.6cqw; font-weight:800; color:var(--blue); margin:0 0 1cqw; line-height:1.1; }
+
+  /* Join */
+  #v-join { flex-direction:row; align-items:center; gap:4cqw; }
+  .join-left { flex:1; }
+  .game-title { font-size:5.4cqw; font-weight:800; color:var(--blue); margin:0 0 1.2cqw; line-height:1; }
+  .game-sub { font-size:1.8cqw; line-height:1.45; margin:0; max-width:44cqw; }
+  .join-right { display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .qr-card { background:#fff; border:.3cqw solid var(--blue); border-radius:1.4cqw; padding:1cqw; }
+  #qr { width:19cqw; height:19cqw; }
+  #qr img, #qr canvas { width:100% !important; height:100% !important; }
+  .join-title { font-family:'Montserrat', Arial, sans-serif; font-size:1.7cqw; font-weight:700; color:var(--ink); margin:1.4cqw 0 .3cqw; }
+  .join-url { font-size:.95cqw; color:var(--grey); margin:0; word-break:break-all; max-width:26cqw; }
+  .join-count { margin-top:1.2cqw; font-family:'Montserrat', Arial, sans-serif; font-size:1.7cqw; font-weight:700; color:var(--blue); }
+
+  /* Board view: left panel + job strip + 12 cards */
+  #v-board { flex-direction:row; gap:2cqw; }
+  .lp { flex:0 0 31cqw; display:flex; flex-direction:column; min-height:0; }
+  .rp { flex:1; display:flex; flex-direction:column; min-width:0; min-height:0; }
+  .lp-top { display:flex; align-items:center; justify-content:space-between; gap:1cqw; min-height:2.6cqw; }
+  .pill { font-size:1cqw; font-weight:800; text-transform:uppercase; letter-spacing:.12cqw; padding:.45cqw 1.1cqw; border-radius:99cqw; background:var(--line); color:var(--grey); white-space:nowrap; }
+  .pill.open { background:var(--blue); color:#fff; }
+  .pill.hide { display:none; }
+  #countdown { width:4.6cqw; height:4.6cqw; border-radius:50%; border:.35cqw solid var(--blue); display:none; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-size:1.8cqw; font-weight:800; color:var(--blue); flex:0 0 auto; }
+  #countdown.on { display:flex; }
+  #countdown.hurry { border-color:var(--amber); color:#a86f00; }
+
+  .jobstrip { display:flex; flex-wrap:wrap; gap:.5cqw; align-items:center; margin:0 0 1cqw; }
+  .jlab { font-size:1cqw; font-weight:800; color:var(--blue); text-transform:uppercase; letter-spacing:.12cqw; margin-right:.4cqw; }
+  .jchip { font-size:.92cqw; background:var(--blue-pale); color:var(--blue-dark); padding:.35cqw .8cqw; border-radius:99cqw; font-weight:700; border:.15cqw solid transparent; transition:all .4s; }
+  .jchip.lit { background:var(--amber-pale); border-color:var(--amber); color:#7a5000; box-shadow:0 0 0 .2cqw rgba(242,169,0,.25); }
+
+  /* The board: a Story-blue plastic tray with two tiers of flip tiles */
+  .tray { flex:1; min-height:0; position:relative; border-radius:1.4cqw; padding:1cqw 1.1cqw .4cqw;
+    background:linear-gradient(180deg, #1b78c4 0%, #0061ad 45%, #004e8c 100%);
+    box-shadow:inset 0 .2cqw 0 rgba(255,255,255,.35), inset 0 -.35cqw 0 rgba(0,0,0,.25), 0 .8cqw 1.6cqw rgba(0,40,80,.28);
+    display:grid; grid-template-columns:repeat(6, 1fr); grid-template-rows:1fr 1fr; column-gap:0; row-gap:.9cqw; }
+  .slot { position:relative; perspective:42cqw; perspective-origin:50% -40%; }
+  .ledge { position:absolute; left:0; right:0; bottom:0; height:1.5cqw; border-radius:.3cqw;
+    background:linear-gradient(180deg, #4a9be0 0%, #1a73bd 30%, #00508f 100%);
+    box-shadow:inset 0 .12cqw 0 rgba(255,255,255,.5), 0 .3cqw .5cqw rgba(0,30,60,.35); }
+  .slot:first-child .ledge, .slot:nth-child(7) .ledge { border-top-left-radius:.6cqw; border-bottom-left-radius:.6cqw; }
+  .slot:nth-child(6) .ledge, .slot:last-child .ledge { border-top-right-radius:.6cqw; border-bottom-right-radius:.6cqw; }
+  .tile { position:absolute; left:.4cqw; right:.4cqw; top:0; bottom:1.05cqw; transform-origin:50% 100%;
+    transition:transform .85s cubic-bezier(.45,.05,.3,1.25); }
+  .frame { position:absolute; inset:0; border-radius:.75cqw; padding:.42cqw .42cqw .55cqw;
+    background:linear-gradient(180deg, #5aa8ea 0%, #1f80cf 18%, #0a6ab8 55%, #00579c 100%);
+    box-shadow:inset 0 .16cqw 0 rgba(255,255,255,.6), inset .14cqw 0 0 rgba(255,255,255,.22), inset -.14cqw 0 0 rgba(0,0,0,.18), inset 0 -.22cqw 0 rgba(0,0,0,.28), 0 .45cqw .7cqw rgba(0,25,55,.4);
+    transition:box-shadow .4s, filter .6s; }
+  .frame::after { content:""; position:absolute; top:.25cqw; bottom:.25cqw; left:12%; width:22%; border-radius:.6cqw; pointer-events:none;
+    background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.22), rgba(255,255,255,0)); }
+  .card { position:relative; height:100%; border-radius:.38cqw; overflow:hidden; display:flex; flex-direction:column; background:#fff;
+    box-shadow:inset 0 0 0 .13cqw #003a69; transition:filter .6s, opacity .6s; }
+  .art { flex:0 0 auto; aspect-ratio:1 / 1; position:relative; border-bottom:.13cqw solid #003a69;
+    background:radial-gradient(circle at 50% 30%, #ffffff 0%, #e4effa 70%), #e4effa; }
+  .art::before { content:""; position:absolute; inset:0; opacity:.5;
+    background-image:radial-gradient(circle, #c4dcf2 .12cqw, transparent .14cqw); background-size:.9cqw .9cqw; }
+  .art svg { position:relative; width:100%; height:100%; display:block; }
+  .plate { flex:0 0 auto; text-align:center; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:1.05cqw; letter-spacing:.06cqw; color:#003a69; padding:.25cqw .2cqw .15cqw; text-transform:uppercase; }
+  .info { flex:1; min-height:0; padding:0 .35cqw .3cqw; text-align:center; }
+  .info .ln { font-size:.86cqw; font-weight:700; color:var(--blue-dark); line-height:1.2; }
+  .info .ps { font-size:.78cqw; color:var(--grey); line-height:1.22; margin-top:.2cqw; }
+  .cover { position:absolute; inset:0; border-radius:.75cqw; opacity:0; transition:opacity .15s; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 .25cqw, rgba(0,0,0,.05) .25cqw .5cqw), linear-gradient(180deg, #2a86d1, #00579c);
+    display:flex; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-style:italic; font-weight:800; font-size:2cqw; color:rgba(255,255,255,.35); }
+  .score { position:absolute; left:50%; bottom:-.35cqw; width:2.3cqw; height:2.3cqw; margin-left:-1.15cqw; border-radius:50%; z-index:3;
+    background:#fff; color:var(--blue); border:.22cqw solid var(--blue); font-family:'Montserrat', Arial, sans-serif; font-size:1.15cqw; font-weight:800;
+    display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.3); transition:all .5s; box-shadow:0 .2cqw .5cqw rgba(0,30,60,.35); }
+  .slot.show-score .score { opacity:1; transform:scale(1); }
+
+  /* States */
+  .slot.down .tile { transform:rotateX(78deg); }
+  .slot.down .cover { opacity:1; transition-delay:.3s; }
+  .slot.hot .frame { box-shadow:inset 0 .16cqw 0 rgba(255,255,255,.6), 0 0 0 .3cqw #f2a900, 0 0 1.4cqw .3cqw rgba(242,169,0,.75); animation:hot 1.4s ease-in-out infinite; }
+  @keyframes hot { 50% { box-shadow:inset 0 .16cqw 0 rgba(255,255,255,.6), 0 0 0 .3cqw #f2a900, 0 0 2.2cqw .6cqw rgba(242,169,0,.45); } }
+  .slot.out .frame { filter:saturate(.15) brightness(1.15); }
+  .slot.out .card { filter:grayscale(1); opacity:.6; }
+  .slot.out .score { border-color:#8a9097; color:#60666d; }
+  .slot.lit .frame { box-shadow:inset 0 .16cqw 0 rgba(255,255,255,.6), 0 0 0 .3cqw var(--green), 0 0 1.4cqw .3cqw rgba(31,157,87,.55); }
+  .slot.lit .score { background:var(--green); border-color:var(--green); color:#fff; }
+  @media (prefers-reduced-motion: reduce) { .tile, .score, .cover { transition:none; } .slot.hot .frame { animation:none; } }
+
+  /* Left panel pieces */
+  .bubble { position:relative; background:var(--blue); color:#fff; border-radius:1.2cqw; padding:1.1cqw 1.3cqw; margin:.6cqw 0 1.1cqw; }
+  .bubble::after { content:""; position:absolute; left:2.4cqw; bottom:-1.1cqw; border:.6cqw solid transparent; border-top:.6cqw solid var(--blue); border-left:.6cqw solid var(--blue); }
+  .bubble-who { font-size:.9cqw; font-weight:800; text-transform:uppercase; letter-spacing:.12cqw; color:#cfe2f3; margin:0 0 .35cqw; }
+  .bubble-text { font-size:1.55cqw; font-weight:700; line-height:1.3; margin:0; }
+  .opts { display:flex; flex-direction:column; gap:.6cqw; }
+  .opt { display:flex; align-items:flex-start; gap:.8cqw; border:.18cqw solid var(--line); border-radius:.9cqw; padding:.7cqw .9cqw; font-size:1.2cqw; font-weight:700; line-height:1.25; background:#fff; }
+  .L { flex:0 0 auto; width:2.3cqw; height:2.3cqw; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.2cqw; }
+  .lp-foot { margin-top:auto; padding-top:.8cqw; font-family:'Montserrat', Arial, sans-serif; font-size:1.25cqw; font-weight:700; color:var(--blue); }
+  .lp-text { font-size:1.45cqw; line-height:1.45; margin:0 0 1cqw; }
+  .lp-big { font-family:'Montserrat', Arial, sans-serif; font-size:2.3cqw; font-weight:800; color:var(--ink); line-height:1.2; margin:0 0 1cqw; }
+  .stat { display:flex; gap:.8cqw; margin:0 0 1.1cqw; }
+  .stat div { flex:1; background:var(--blue-pale); border-radius:.9cqw; padding:.8cqw .6cqw; text-align:center; font-size:1cqw; font-weight:700; color:var(--blue-dark); }
+  .stat b { display:block; font-family:'Montserrat', Arial, sans-serif; font-size:2.6cqw; color:var(--blue); line-height:1.05; }
+  .stat div.warn { background:var(--amber-pale); color:#7a5000; } .stat div.warn b { color:#a86f00; }
+
+  /* Reveal rows */
+  .decision { background:var(--ink); color:#fff; border-radius:.9cqw; padding:.7cqw 1cqw; font-size:1.2cqw; line-height:1.35; margin:.4cqw 0 .8cqw; }
+  .decision b { font-family:'Montserrat', Arial, sans-serif; }
+  .rv-row { display:flex; gap:.8cqw; align-items:flex-start; border:.18cqw solid var(--line); border-radius:.9cqw; padding:.6cqw .8cqw; }
+  .rv-row.best { border-color:var(--amber); background:var(--amber-pale); }
+  .rv-row.best .L { background:var(--amber); color:#3b2a00; }
+  .rv-row.picked { box-shadow:inset .35cqw 0 0 var(--ink); }
+  .rv-mid { flex:1; min-width:0; }
+  .rv-title { font-family:'Montserrat', Arial, sans-serif; font-size:1.05cqw; font-weight:800; margin:0 0 .2cqw; line-height:1.25; }
+  .rv-why { font-size:.95cqw; line-height:1.3; margin:0; color:var(--ink); }
+  .rv-right { flex:0 0 5.4cqw; text-align:right; }
+  .pts { font-size:1.6cqw; font-weight:800; color:var(--blue); line-height:1; }
+  .rv-row.best .pts { color:#a86f00; }
+  .votes { font-family:'Montserrat', Arial, sans-serif; font-size:.9cqw; font-weight:700; color:var(--grey); margin-top:.2cqw; }
+  .tag { display:inline-block; background:var(--amber); color:#3b2a00; font-size:.75cqw; font-weight:800; text-transform:uppercase; letter-spacing:.08cqw; padding:.15cqw .55cqw; border-radius:99cqw; margin-left:.4cqw; vertical-align:middle; }
+  .reveal-line { margin-top:auto; padding-top:.8cqw; font-size:1.2cqw; line-height:1.4; border-left:.4cqw solid var(--blue); padding-left:.9cqw; }
+  .names { font-size:1.25cqw; line-height:1.6; margin:0 0 1cqw; }
+  .names b { font-family:'Montserrat', Arial, sans-serif; color:var(--ink); }
+  .tagline { font-family:'Montserrat', Arial, sans-serif; font-size:2.6cqw; font-weight:800; color:var(--green); line-height:1.15; margin-top:auto; }
+
+  /* Final scores */
+  .board { display:grid; grid-auto-flow:column; grid-template-rows:repeat(5, auto); gap:.8cqw 2cqw; width:70cqw; margin:0 auto; text-align:left; }
+  .board.one-col { grid-auto-flow:row; width:44cqw; }
+  .brow { display:flex; align-items:center; gap:1cqw; background:var(--blue-pale); border-radius:.8cqw; padding:.8cqw 1.2cqw; font-size:1.8cqw; font-weight:700; }
+  .brow .rank { color:var(--blue); width:2.4cqw; font-family:'Montserrat', Arial, sans-serif; }
+  .brow .bn { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brow .p { font-family:'Montserrat', Arial, sans-serif; color:var(--blue); font-weight:800; }
+  .brow.lead { background:var(--amber-pale); box-shadow:0 0 0 .2cqw var(--amber); }
+  #winNames { font-family:'Montserrat', Arial, sans-serif; font-size:3.6cqw; font-weight:800; color:var(--blue); line-height:1.15; margin:0 0 1.6cqw; }
+
+  /* Start overlay */
+  #start { position:fixed; inset:0; background:var(--blue); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
+  #start img { width:min(50vw, 700px); }
+  #start button { margin-top:4vh; font-size:clamp(18px, 2.2vw, 32px); font-weight:800; padding:1.1vw 3vw; border-radius:999px; border:none; background:#fff; color:var(--blue); cursor:pointer; }
+  #start p { color:#cfe2f3; font-size:clamp(13px, 1.1vw, 18px); margin-top:2vh; }
+  .hide { display:none !important; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="bar"><img id="barLogo" alt="Story"><span>Fairness, Inclusion and Respect</span></div>
+    <div id="panel">
+      <section id="v-waiting" class="on center"><p class="muted" style="font-size:2cqw">Waiting for the control screen to connect...</p></section>
+
+      <section id="v-join">
+        <div class="join-left">
+          <p class="eyebrow">Shortlisting activity</p>
+          <h1 class="game-title" id="gameTitle"></h1>
+          <p class="muted game-sub" id="gameSub"></p>
+        </div>
+        <div class="join-right">
+          <div class="qr-card"><div id="qr"></div></div>
+          <p class="join-title">Scan to join: one phone per table</p>
+          <p class="join-url" id="joinUrl"></p>
+          <p class="join-count" id="joinCount"></p>
+        </div>
+      </section>
+
+      <section id="v-board">
+        <div class="lp">
+          <div class="lp-top"><p class="eyebrow" id="lpEyebrow" style="margin:0"></p><span class="pill hide" id="lpPill"></span><div id="countdown"></div></div>
+          <div id="lpBody" style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
+        </div>
+        <div class="rp">
+          <div class="jobstrip" id="jobstrip"></div>
+          <div class="tray" id="grid"></div>
+        </div>
+      </section>
+
+      <section id="v-winner" class="center">
+        <p class="eyebrow">Final scores</p>
+        <h1 class="big-head" id="winHead"></h1>
+        <p id="winNames"></p>
+        <div class="board" id="board"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="start">
+    <img id="startLogo" alt="Story">
+    <button id="startBtn">Click to start</button>
+    <p>Drag this window onto the projector first. This click turns the sound on and goes full screen.</p>
+  </div>
+
+<script>
+  var C = window.SL_CONFIG, G = window.SL_GAME, S = C.sounds;
+  var IMG = C.assets + 'images/', AUD = C.assets + 'audio/';
+  var el = function (id) { return document.getElementById(id); };
+  el('gameTitle').textContent = G.title;
+  el('gameSub').textContent = G.subtitle;
+  el('barLogo').src = IMG + C.images.logo;
+  el('startLogo').src = IMG + C.images.logo;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var byId = {}; G.applicants.forEach(function (a) { byId[a.id] = a; });
+  function first(id) { return byId[id].name.split(' ')[0]; }
+  function listNames(ids) {
+    var n = ids.map(first);
+    if (n.length < 2) return n.join('');
+    return n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+  }
+  function pts(r, L) { return L === r.best ? 10 : 5; }
+
+  // ---- Faces: illustrated portraits, drawn in code (no image files needed) ----
+  function shade(hex, amt) {
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    function f(c) { return Math.max(0, Math.min(255, Math.round(amt < 0 ? c * (1 + amt) : c + (255 - c) * amt))); }
+    return '#' + ((1 << 24) + (f(r) << 16) + (f(g) << 8) + f(b)).toString(16).slice(1);
+  }
+  function avatar(a, i) {
+    var k = a.look, f = a.sex === 'f', id = 'av' + i, s = '';
+    var sk = k.skin, skD = shade(sk, -0.2), skDD = shade(sk, -0.38), skL = shade(sk, 0.22);
+    var h = k.hair, hD = shade(h, -0.35), hL = shade(h, 0.3);
+    var top = k.top || '#4a5568', topD = shade(top, -0.3), topL = shade(top, 0.18), eye = k.eyes || '#5a3b22';
+    var HR = 'url(#' + id + 'hr)', SK = 'url(#' + id + 'sk)';
+    s += '<svg viewBox="0 0 100 100" aria-hidden="true"><defs>' +
+      '<radialGradient id="' + id + 'sk" cx="44%" cy="36%" r="68%"><stop offset="0" stop-color="' + skL + '"/><stop offset=".65" stop-color="' + sk + '"/><stop offset="1" stop-color="' + skD + '"/></radialGradient>' +
+      '<linearGradient id="' + id + 'hr" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="' + hL + '"/><stop offset=".55" stop-color="' + h + '"/><stop offset="1" stop-color="' + hD + '"/></linearGradient>' +
+      '<linearGradient id="' + id + 'tp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + topL + '"/><stop offset="1" stop-color="' + topD + '"/></linearGradient>' +
+      '<clipPath id="' + id + 'c"><rect x="0" y="0" width="100" height="100"/></clipPath></defs><g clip-path="url(#' + id + 'c)">';
+
+    // Hair behind the head
+    if (k.style === 'long') s += '<path d="M27,36 C20,58 21,84 25,106 L75,106 C79,84 80,58 73,36 Z" fill="' + hD + '"/>';
+    if (k.style === 'bob') s += '<path d="M27,38 C23,54 24,68 28,75 L72,75 C76,68 77,54 73,38 Z" fill="' + hD + '"/>';
+    if (k.style === 'curly') [[24,60],[76,60],[26,70],[74,70]].forEach(function (c) { s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="7" fill="' + hD + '"/>'; });
+
+    // Shoulders and clothes
+    s += '<path d="M6,104 C8,86 25,78.5 50,78.5 C75,78.5 92,86 94,104 Z" fill="url(#' + id + 'tp)"/>';
+    s += '<path d="M14,92 C20,86 28,83 34,82" stroke="' + topL + '" stroke-width="1.2" fill="none" opacity=".6"/>';
+    if (k.outfit === 'shirt') s += '<path d="M41,79 L50,91 L59,79 L56,76 L50,84 L44,76 Z" fill="#f4f6f8" stroke="#c9d1d9" stroke-width=".6"/><path d="M50,91 L50,104" stroke="' + topD + '" stroke-width="1"/><circle cx="50" cy="96" r=".9" fill="#f4f6f8"/>';
+    if (k.outfit === 'polo') s += '<path d="M42,78.5 L50,87 L58,78.5 L54.5,76.5 L50,81 L45.5,76.5 Z" fill="' + topL + '" stroke="' + topD + '" stroke-width=".6"/><path d="M50,87 L50,95" stroke="' + topD + '" stroke-width=".8"/><circle cx="50" cy="90" r=".9" fill="#fff"/><circle cx="50" cy="94" r=".9" fill="#fff"/>';
+    if (k.outfit === 'jumper') s += '<path d="M41.5,78.5 Q50,88 58.5,78.5" stroke="' + topD + '" stroke-width="3.2" fill="none"/><path d="M41.5,78.5 Q50,88 58.5,78.5" stroke="' + topL + '" stroke-width=".8" fill="none" opacity=".6"/>';
+    if (k.outfit === 'blazer') s += '<path d="M44,79 L50,96 L56,79 Z" fill="#f4f6f8"/><path d="M44,79 L36.5,86.5 L46.5,104 L50,96 Z M56,79 L63.5,86.5 L53.5,104 L50,96 Z" fill="' + topD + '"/><path d="M44,79 L36.5,86.5 L41,88 Z M56,79 L63.5,86.5 L59,88 Z" fill="' + topL + '" opacity=".5"/>';
+    if (k.outfit === 'hivis') s += '<path d="M42.5,79 L50,89 L57.5,79 Z" fill="#f4f6f8"/><path d="M19,88 C24,82 33,79 42,79 L47,106 L15,106 Z M81,88 C76,82 67,79 58,79 L53,106 L85,106 Z" fill="#f47c20"/><path d="M19,96 L46,96 M54,96 L82,96" stroke="#dfe3e8" stroke-width="3.4"/><path d="M19,96 L46,96 M54,96 L82,96" stroke="#ffffff" stroke-width="1" opacity=".7"/>';
+
+    // Neck and ears
+    s += '<path d="M41,60 L41,79 Q50,86 59,79 L59,60 Z" fill="' + sk + '"/><path d="M41,64 Q50,76 59,64 L59,60 L41,60 Z" fill="' + skDD + '" opacity=".45"/>';
+    s += '<ellipse cx="29" cy="50" rx="3.8" ry="5.8" fill="' + skD + '"/><ellipse cx="29.6" cy="50" rx="1.8" ry="3.4" fill="' + skDD + '" opacity=".5"/>';
+    s += '<ellipse cx="71" cy="50" rx="3.8" ry="5.8" fill="' + skD + '"/><ellipse cx="70.4" cy="50" rx="1.8" ry="3.4" fill="' + skDD + '" opacity=".5"/>';
+
+    // Head
+    var jaw = f ? 'M29.5,45 C29.5,27 38.5,20.5 50,20.5 C61.5,20.5 70.5,27 70.5,45 C70.5,60 62,71 50,71 C38,71 29.5,60 29.5,45 Z'
+                : 'M29,45 C29,27 38,20.5 50,20.5 C62,20.5 71,27 71,45 C71,61 63,72.5 50,72.5 C37,72.5 29,61 29,45 Z';
+    s += '<path d="' + jaw + '" fill="' + SK + '"/>';
+    s += '<path d="M33,58 C36,66 42,70.5 50,71 C44,68 38,64 33,58 Z" fill="' + skDD + '" opacity=".22"/>';
+
+    // Beard (under the mouth, over the face)
+    if (k.beard === 'short') s += '<path d="M29.5,48 C30,65 39,75.5 50,75.5 C61,75.5 70,65 70.5,48 C68.5,59 62.5,63.5 56.5,62.5 C53.5,61 46.5,61 43.5,62.5 C37.5,63.5 31.5,59 29.5,48 Z" fill="' + HR + '"/><path d="M41.5,60.5 Q50,56.5 58.5,60.5 Q50,62.6 41.5,60.5 Z" fill="' + h + '"/>';
+    if (k.beard === 'stubble') s += '<path d="M30.5,51 C31.5,65 40,73 50,73 C60,73 68.5,65 69.5,51 C66.5,59 60,62.5 50,62.5 C40,62.5 33.5,59 30.5,51 Z" fill="' + h + '" opacity=".28"/>';
+
+    // Hair on top
+    if (k.style === 'short') s += '<path d="M28.5,49 C25.5,29 36,16 51,16.5 C65.5,17 75.5,28 71.5,49 C70.5,41 68,35 64,32 C58,34.5 50,30.5 44,33.5 C39,32.5 34,37 31,43 Z" fill="' + HR + '"/><path d="M40,22 Q48,19 57,22 M37,27 Q46,23 55,25" stroke="' + hL + '" stroke-width=".8" fill="none" opacity=".7"/>';
+    if (k.style === 'crop') s += '<path d="M29.8,42 C29.8,26 39,18.5 50,18.5 C61,18.5 70.2,26 70.2,42 C67,34.5 60,30.5 50,30.5 C40,30.5 33,34.5 29.8,42 Z" fill="' + HR + '"/>';
+    if (k.style === 'long' || k.style === 'bob') s += '<path d="M28,53 C24.5,28 37,16.5 50,16.5 C63,16.5 75.5,28 72,53 C70.5,42 66,34 59.5,30 C54,35 43.5,35.5 36.5,31.5 C32.5,36.5 29.5,44 28,53 Z" fill="' + HR + '"/><path d="M50,17 Q53,24 59.5,30" stroke="' + hD + '" stroke-width=".9" fill="none"/>';
+    if (k.style === 'long') s += '<path d="M28,47 C26.5,62 27.5,75 31,86 L36.5,86 C33,74 32.5,61 33,50 Z M72,47 C73.5,62 72.5,75 69,86 L63.5,86 C67,74 67.5,61 67,50 Z" fill="' + HR + '"/>';
+    if (k.style === 'bun') s += '<circle cx="50" cy="13.5" r="8.5" fill="' + HR + '"/><path d="M44,13 Q50,9 56,13" stroke="' + hD + '" stroke-width=".9" fill="none"/><path d="M30,46 C28.5,28 38,19.5 50,19.5 C62,19.5 71.5,28 70,46 C67,36 60,31 50,31 C40,31 33,36 30,46 Z" fill="' + HR + '"/><path d="M38,25 Q44,21 50,21 M50,21 Q56,21 62,25" stroke="' + hL + '" stroke-width=".8" fill="none" opacity=".7"/>';
+    if (k.style === 'curly') [[31,46],[30,37.5],[34,29.5],[40,23.5],[47,20.5],[54,20.5],[61,23.5],[66.5,29.5],[70,37.5],[69,46],[28.5,54],[71.5,54]].forEach(function (c) {
+      s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="7" fill="' + HR + '"/><circle cx="' + (c[0] - 1.8) + '" cy="' + (c[1] - 1.8) + '" r="2.2" fill="' + hL + '" opacity=".45"/>';
+    });
+    if (k.style === 'bald') s += '<path d="M29.5,55 C29,46 30,41 32.5,37.5 L34,52 Z M70.5,55 C71,46 70,41 67.5,37.5 L66,52 Z" fill="' + h + '" opacity=".8"/><ellipse cx="43" cy="28" rx="7" ry="3" fill="#fff" opacity=".28" transform="rotate(-12 43 28)"/>';
+
+    // Brows
+    s += '<path d="M36.5,' + (f ? '41' : '41.5') + ' Q41.5,' + (f ? '37' : '38') + ' 46.5,40 M53.5,40 Q58.5,' + (f ? '37' : '38') + ' 63.5,' + (f ? '41' : '41.5') + '" stroke="' + hD + '" stroke-width="' + (f ? 1.5 : 2.4) + '" fill="none" stroke-linecap="round"/>';
+    // Eyes
+    [41.5, 58.5].forEach(function (cx, n) {
+      var cy = 47.5;
+      s += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="4.3" ry="' + (f ? 3.7 : 3.3) + '" fill="#fff" stroke="' + skDD + '" stroke-width=".4"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy + .2) + '" r="2.55" fill="' + eye + '"/><circle cx="' + cx + '" cy="' + (cy + .2) + '" r="1.3" fill="#151515"/>';
+      s += '<circle cx="' + (cx + .95) + '" cy="' + (cy - .8) + '" r=".85" fill="#fff"/>';
+      s += '<path d="M' + (cx - 4.7) + ',' + (cy - .3) + ' Q' + cx + ',' + (cy - 4.9) + ' ' + (cx + 4.7) + ',' + (cy - .3) + '" stroke="#2b2f33" stroke-width="' + (f ? 1.25 : .95) + '" fill="none" stroke-linecap="round"/>';
+      if (f) s += '<path d="M' + (n ? cx + 4.4 : cx - 4.4) + ',' + (cy - .9) + ' l' + (n ? 1.4 : -1.4) + ',-1.3" stroke="#2b2f33" stroke-width=".9" stroke-linecap="round"/>';
+      s += '<path d="M' + (cx - 3.4) + ',' + (cy + 2.9) + ' Q' + cx + ',' + (cy + 4.2) + ' ' + (cx + 3.4) + ',' + (cy + 2.9) + '" stroke="' + skD + '" stroke-width=".7" fill="none"/>';
+    });
+    // Nose
+    s += '<path d="M50.3,48 C51.8,52 53.2,55 52.6,57.6 Q51.2,56.8 50.3,48 Z" fill="' + skDD + '" opacity=".35"/>';
+    s += '<path d="M49.8,49.5 C48.8,53 46.8,55.8 47.4,57.4 C48.4,59 51.6,59 52.6,57.4" stroke="' + skDD + '" stroke-width="1.1" fill="none" stroke-linecap="round"/>';
+    // Cheeks
+    s += '<circle cx="36.5" cy="57" r="3.8" fill="#e8735c" opacity=".16"/><circle cx="63.5" cy="57" r="3.8" fill="#e8735c" opacity=".16"/>';
+    // Mouth
+    var lip = f ? '#c2615a' : shade(sk, -0.3);
+    s += '<path d="M42.8,62.2 Q50,70 57.2,62.2 Z" fill="#7a2f2a"/><path d="M43.8,62.6 L56.2,62.6 Q50,65.4 43.8,62.6 Z" fill="#fff"/>';
+    s += '<path d="M42.3,62 Q46,61 50,62 Q54,61 57.7,62" stroke="' + lip + '" stroke-width="1.1" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M45.5,67.2 Q50,69.6 54.5,67.2" stroke="' + lip + '" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".8"/>';
+    // Glasses
+    if (k.glasses) s += '<g fill="none" stroke="#24292e" stroke-width="1.4"><rect x="35.3" y="42.6" width="12.4" height="9.6" rx="3"/><rect x="52.3" y="42.6" width="12.4" height="9.6" rx="3"/><path d="M47.7,46 Q50,44.8 52.3,46 M35.3,45.5 L30,44 M64.7,45.5 L70,44"/></g><path d="M37,44.5 L40,44.5" stroke="#fff" stroke-width=".8" opacity=".6"/>';
+    s += '</g></svg>';
+    return s;
+  }
+
+  // ---- Build the job strip and the board once ----
+  el('jobstrip').innerHTML = '<span class="jlab">Job card: ' + esc(G.role) + '</span>' +
+    G.job.map(function (j, i) { return '<span class="jchip" data-j="' + i + '">' + esc(j) + '</span>'; }).join('');
+  el('grid').innerHTML = G.applicants.map(function (a, i) {
+    return '<div class="slot" data-id="' + a.id + '"><div class="ledge"></div>' +
+      '<div class="tile"><div class="frame"><div class="card"><div class="art">' + avatar(a, i) + '</div>' +
+      '<div class="plate">' + esc(a.name.split(' ')[0]) + '</div>' +
+      '<div class="info"><div class="ln">' + esc(a.card) + '</div><div class="ps">' + esc(a.personal) + '</div></div></div>' +
+      '<div class="cover">STORY</div></div></div>' +
+      '<div class="score">' + a.score + '</div></div>';
+  }).join('');
+
+  // Applicants in order of their job card score: the shortlist the job card would pick.
+  var SPEC_TOP = G.applicants.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 5).map(function (a) { return a.id; });
+  var ALL_SHORTCUTS = {};
+  G.rounds.forEach(function (r) { var worst = Object.keys(r.flips).sort(function (a, b) { return r.flips[b].length - r.flips[a].length; })[0]; r.flips[worst].forEach(function (id) { ALL_SHORTCUTS[id] = 1; }); });
+
+  // card states: { id: 'down' | 'out' | 'lit' | 'hot' | '' }, plus whether scores show
+  function setBoard(states, showScores) {
+    document.querySelectorAll('.slot').forEach(function (c) {
+      var st = states[c.getAttribute('data-id')] || '';
+      c.className = 'slot' + (st ? ' ' + st : '') + (showScores ? ' show-score' : '');
+    });
+  }
+  function setJob(i) {
+    document.querySelectorAll('.jchip').forEach(function (c) { c.classList.toggle('lit', i !== null && i !== undefined && +c.getAttribute('data-j') === i); });
+  }
+
+  // ---- Sound ----
+  var started = false, actx = null, sounds = [], musicOn = true;
+  function stopAudio() { sounds.forEach(function (a) { try { a.pause(); } catch (e) {} }); sounds = []; }
+  function play(f, vol, loop, isMusic, onDone) {
+    if (!f) { if (onDone) onDone(); return null; }
+    var a = new Audio(AUD + f);
+    a.base = vol; a.isMusic = !!isMusic; a.loop = !!loop;
+    a.volume = (isMusic && !musicOn) ? 0 : vol;
+    if (onDone) { a.addEventListener('ended', onDone); a.addEventListener('error', onDone); }
+    sounds.push(a);
+    var p = a.play(); if (p && p.catch) p.catch(function () { if (onDone) onDone(); });
+    return a;
+  }
+  function applyMusic() { sounds.forEach(function (a) { if (a.isMusic) { try { a.volume = musicOn ? a.base : 0; } catch (e) {} } }); }
+  function report(type) { if (window.opener) { try { window.opener.postMessage({ type: type }, '*'); } catch (e) {} } }
+  function beep(freq, dur) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  function playCue(st) {
+    switch (st.phase) {
+      case 'voting': stopAudio(); play(S.votingMusic, 0.5, true, true); break;
+      case 'closed': stopAudio(); beep(523, 0.25); setTimeout(function () { report('closed-done'); }, 1500); break;
+      case 'reveal': stopAudio(); beep(784, 0.3); break;
+      case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
+      default: stopAudio();
+    }
+  }
+
+  // ---- Voting timer (beeps in the last 5 seconds) ----
+  var lastBeep = null, current = null;
+  setInterval(function () {
+    var st = current, box = el('countdown');
+    if (!st || st.phase !== 'voting' || !st.endsAt) { box.className = ''; return; }
+    var left = Math.max(0, Math.ceil((st.endsAt - Date.now()) / 1000));
+    box.className = 'on' + (left <= 10 ? ' hurry' : '');
+    box.textContent = left >= 60 ? Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2) : left;
+    if (started && left <= 5 && left > 0 && lastBeep !== st.endsAt + '-' + left) {
+      lastBeep = st.endsAt + '-' + left; beep(left === 1 ? 880 : 660, 0.18);
+    }
+  }, 200);
+
+  // ---- Drawing each screen ----
+  var lastQrUrl = '', lastSig = '', lastCue = null;
+  function showSection(id) { document.querySelectorAll('section').forEach(function (s) { s.classList.toggle('on', s.id === id); }); }
+  function pill(text, open) { var p = el('lpPill'); p.textContent = text || ''; p.className = 'pill' + (open ? ' open' : '') + (text ? '' : ' hide'); }
+  function bubble(text) { return '<div class="bubble"><p class="bubble-who">' + esc(G.manager) + ', hiring manager</p><p class="bubble-text">' + esc(text) + '</p></div>'; }
+  function downStates(down) { var s = {}; (down || []).forEach(function (id) { s[id] = 'down'; }); return s; }
+
+  function render(st) {
+    var sig = JSON.stringify([st.phase, st.round, st.joinUrl, st.teamCount, st.answered, st.counts, st.down, st.decision, st.scores, st.closeReason]);
+    if (sig === lastSig) return;
+    lastSig = sig;
+
+    if (st.phase === 'join') {
+      showSection('v-join');
+      el('joinUrl').textContent = st.joinUrl;
+      el('joinCount').textContent = st.teamCount === 1 ? '1 table has joined' : st.teamCount + ' tables have joined';
+      if (st.joinUrl && st.joinUrl !== lastQrUrl) {
+        lastQrUrl = st.joinUrl; el('qr').innerHTML = '';
+        new QRCode(el('qr'), { text: st.joinUrl, width: 512, height: 512, colorDark: '#0061ad', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      }
+      return;
+    }
+
+    if (st.phase === 'winner') {
+      showSection('v-winner');
+      var w = st.winners || [];
+      el('winHead').textContent = !w.length ? 'Thanks for taking part' : w.length > 1 ? 'Our joint winners' : 'Our winning table';
+      el('winNames').textContent = w.join('  &  ');
+      drawBoard(st.scores);
+      return;
+    }
+
+    showSection('v-board');
+    var down = st.down || [], body = '', r = G.rounds[st.round];
+    var standing = G.applicants.filter(function (a) { return down.indexOf(a.id) < 0; });
+    setJob(null); pill('');
+
+    if (st.phase === 'intro') {
+      el('lpEyebrow').textContent = 'The vacancy';
+      body = '<p class="lp-big">Twelve applicants for one ' + esc(G.role) + ' post.</p>' +
+        '<p class="lp-text">' + esc(G.manager) + ' is the hiring manager. He has a pile of CVs and not much time, so he wants some shortcuts.</p>' +
+        '<p class="lp-text">Each round, your table decides whether the room takes his shortcut. Whoever the room flips down stays down.</p>' +
+        '<p class="lp-foot">The job card stays up there all game.</p>';
+      setBoard({}, false);
+    }
+
+    else if (st.phase === 'dave' || st.phase === 'voting' || st.phase === 'closed') {
+      el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + ' of ' + G.rounds.length + '  |  ' + r.title;
+      if (st.phase === 'dave') pill('Get ready');
+      if (st.phase === 'voting') pill('Discuss and vote', true);
+      if (st.phase === 'closed') pill(st.closeReason === 'votes-in' ? 'The votes are in' : "Time's up");
+      body = bubble(r.dave) + '<div class="opts">' + Object.keys(r.options).map(function (L) {
+        return '<div class="opt"><span class="L">' + L + '</span><span>' + esc(r.options[L]) + '</span></div>';
+      }).join('') + '</div>';
+      body += '<p class="lp-foot">' + (st.phase === 'dave' ? 'Highlighted: who this shortcut would remove' : st.answered + ' of ' + st.teamCount + (st.teamCount === 1 ? ' table has' : ' tables have') + ' voted') + '</p>';
+      var s = downStates(down);
+      Object.keys(r.flips).forEach(function (L) { r.flips[L].forEach(function (id) { if (!s[id]) s[id] = 'hot'; }); });
+      setBoard(s, false);
+    }
+
+    else if (st.phase === 'reveal') {
+      el('lpEyebrow').textContent = 'Round ' + (st.round + 1) + '  |  The reveal';
+      var dec = st.decision, newly = dec ? r.flips[dec].filter(function (id) { return (st.downBefore || []).indexOf(id) < 0; }) : [];
+      body = '<div class="decision">' + (dec ? 'The room chose <b>' + dec + '</b>. ' + (newly.length ? esc(listNames(newly)) + (newly.length === 1 ? ' flips' : ' flip') + ' down.' : 'Nobody flips down.') : 'No votes this round, so nobody flips down.') + '</div>';
+      body += '<div class="opts">' + Object.keys(r.options).map(function (L) {
+        var n = (st.counts && st.counts[L]) || 0, best = L === r.best;
+        return '<div class="rv-row' + (best ? ' best' : '') + (L === dec ? ' picked' : '') + '"><span class="L">' + L + '</span>' +
+          '<div class="rv-mid"><p class="rv-title">' + esc(r.options[L]) + (best ? '<span class="tag">Strongest</span>' : '') + '</p>' +
+          '<p class="rv-why">' + esc(r.why[L]) + '</p></div>' +
+          '<div class="rv-right"><div class="pts">+' + pts(r, L) + '</div><div class="votes">' + n + (n === 1 ? ' table' : ' tables') + '</div></div></div>';
+      }).join('') + '</div>';
+      body += '<p class="reveal-line">' + esc(r.reveal) + '</p>';
+      setBoard(downStates(down), false);
+      setJob(r.job);
+    }
+
+    else if (st.phase === 'f-room') {
+      el('lpEyebrow').textContent = 'The final reveal';
+      var women = standing.filter(function (a) { return a.sex === 'f'; }).length;
+      body = '<p class="lp-big">The room\'s shortlist</p>' +
+        '<div class="stat"><div><b>' + standing.length + '</b>still standing</div><div class="' + (women ? '' : 'warn') + '"><b>' + women + '</b>' + (women === 1 ? 'woman' : 'women') + '</div><div><b>' + down.length + '</b>flipped down</div></div>' +
+        '<p class="lp-big" style="color:var(--blue);margin-top:auto">' + esc(G.final.roomAsk) + '</p>';
+      setBoard(downStates(down), false);
+    }
+
+    else if (st.phase === 'f-scores') {
+      el('lpEyebrow').textContent = 'The final reveal';
+      var lost = G.applicants.filter(function (a) { return down.indexOf(a.id) > -1; }).sort(function (a, b) { return b.score - a.score; });
+      var lostTop = lost.filter(function (a) { return SPEC_TOP.indexOf(a.id) > -1; });
+      body = '<p class="lp-big">Every card now shows its score against the job card</p>' +
+        '<div class="stat"><div class="' + (lostTop.length ? 'warn' : '') + '"><b>' + lostTop.length + ' of 5</b>top applicants flipped down</div></div>' +
+        (lost.length ? '<p class="names">' + lost.map(function (a) { return '<b>' + esc(first(a.id)) + '</b> ' + a.score + ': ' + esc(a.behind); }).slice(0, 4).join('<br>') + '</p>' : '<p class="lp-text">The room kept every applicant in. Nobody was lost to a shortcut.</p>');
+      var s2 = {}; down.forEach(function (id) { s2[id] = 'out'; });
+      setBoard(s2, true);
+    }
+
+    else if (st.phase === 'f-shortcut') {
+      el('lpEyebrow').textContent = 'The final reveal';
+      var left = G.applicants.filter(function (a) { return !ALL_SHORTCUTS[a.id]; });
+      var topGone = SPEC_TOP.filter(function (id) { return ALL_SHORTCUTS[id]; }).length;
+      var womenLeft = left.filter(function (a) { return a.sex === 'f'; }).length;
+      body = '<p class="lp-big">' + esc(G.final.shortcutHead) + '</p>' +
+        '<div class="stat"><div class="warn"><b>' + topGone + ' of 5</b>top applicants gone</div><div class="warn"><b>' + womenLeft + '</b>' + (womenLeft === 1 ? 'woman left' : 'women left') + '</div></div>' +
+        bubble(G.final.shortcutDave) + '<p class="lp-text" style="margin-top:auto;margin-bottom:0">' + esc(G.final.shortcutNote) + '</p>';
+      var s3 = {}; Object.keys(ALL_SHORTCUTS).forEach(function (id) { s3[id] = 'down'; });
+      setBoard(s3, true);
+    }
+
+    else if (st.phase === 'f-spec') {
+      el('lpEyebrow').textContent = 'The final reveal';
+      body = '<p class="lp-big">The shortlist the job card picks</p>' +
+        '<p class="names">' + SPEC_TOP.map(function (id) { return '<b>' + esc(byId[id].name) + '</b> ' + byId[id].score; }).join('<br>') + '</p>' +
+        '<p class="tagline">' + esc(G.final.tagline) + '</p>';
+      var s4 = {}; G.applicants.forEach(function (a) { s4[a.id] = SPEC_TOP.indexOf(a.id) > -1 ? 'lit' : 'out'; });
+      setBoard(s4, true);
+    }
+
+    el('lpBody').innerHTML = body;
+  }
+
+  function drawBoard(scores) {
+    var list = (scores || []).slice(0, 10);
+    var b = el('board');
+    b.classList.toggle('one-col', list.length <= 5);
+    var top = list.length ? list[0].score : 0;
+    var rank = 0, prev = null;
+    b.innerHTML = list.map(function (x, i) {
+      if (x.score !== prev) { rank = i + 1; prev = x.score; }
+      return '<div class="brow' + (x.score === top ? ' lead' : '') + '"><span class="rank">' + rank + '</span><span class="bn">' +
+        esc(x.name) + '</span><span class="p">' + x.score + '</span></div>';
+    }).join('') || '<p class="muted" style="font-size:1.6cqw">No tables joined.</p>';
+  }
+
+  // ---- Messages from the control screen ----
+  var lastMsgAt = 0;
+  window.addEventListener('message', function (e) {
+    var m = e.data || {};
+    if (m.type !== 'display' || !m.state) return;
+    lastMsgAt = Date.now();
+    var st = m.state; current = st;
+    if (st.musicOn !== undefined && st.musicOn !== musicOn) { musicOn = st.musicOn; applyMusic(); }
+    render(st);
+    if (st.cue && st.cue.id !== lastCue) {
+      lastCue = st.cue.id;
+      if (started && Date.now() - st.cue.at < 4000) playCue(st);
+    }
+  });
+
+  el('startBtn').addEventListener('click', function () {
+    started = true;
+    el('start').classList.add('hide');
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) {}
+    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+  });
+
+  function sayReady() { if (window.opener) { try { window.opener.postMessage({ type: 'stage-ready' }, '*'); } catch (e) {} } }
+  sayReady();
+  setInterval(function () { if (Date.now() - lastMsgAt > 3000) sayReady(); }, 3000);
+</script>
+</body>
+</html>
