@@ -146,7 +146,7 @@
     switch (s.phase) {
       case 'join': return 'Join screen';
       case 'intro': return 'Meet the applicants';
-      case 'dave': return R + ": Dave's shortcut (" + G.rounds[s.round].title + ')';
+      case 'dave': return R + ": Neil's shortcut (" + G.rounds[s.round].title + ')';
       case 'voting': return R + ': discuss and vote';
       case 'closed': return R + ': close voting';
       case 'veto': return R + ': how the room voted (veto window)';
@@ -375,7 +375,7 @@
   var FINAL_NOTES = {
     'f-room': 'Ask the room: happy with this shortlist? Let a couple of tables answer before you move on.',
     'f-scores': 'Every card shows its score against the job card. Point out who the room lost and why they were strong.',
-    'f-shortcut': "What happens if every one of Dave's shortcuts goes through: Danny and Mark, the two applicants most like Dave. Every shortcut sounded reasonable on its own.",
+    'f-shortcut': "What happens if every one of Neil's shortcuts goes through: Danny and Mark, the two applicants most like Neil. Every shortcut sounded reasonable on its own.",
     'f-spec': 'End on the hopeful note: same pile of CVs, different questions. Then ask each table which of these shortcuts they have heard on a real shortlist, and one change each person will make.',
     'winner': 'Final scores. Scores are for the game, not an assessment of anyone.'
   };
@@ -386,7 +386,7 @@
     el('nowTitle').textContent = label(s);
     var html = '', r = G.rounds[s.round];
     if (s.phase === 'join') html = '<p>Tables scan the QR code and join, one phone per table. Press Next when everyone is in.</p>';
-    else if (s.phase === 'intro') html = '<p>The board and job card are up. Introduce Dave and the vacancy: whoever the room flips down stays down.</p>';
+    else if (s.phase === 'intro') html = '<p>The board and job card are up. Introduce Neil and the vacancy: whoever the room flips down stays down.</p>';
     else if (FINAL_NOTES[s.phase]) html = '<p>' + esc(FINAL_NOTES[s.phase]) + '</p>';
     else if (s.phase === 'veto') {
       var dv = decisionFor(s.round);
@@ -395,7 +395,7 @@
         '<p><span class="lbl">Vetoes left:</span> ' + esc(vetoHolders().join(', ') || 'none') + '</p>';
     }
     else {
-      html += '<p><span class="lbl">Dave:</span> ' + esc(r.dave) + '</p>';
+      html += '<p><span class="lbl">Neil:</span> ' + esc(r.dave) + '</p>';
       Object.keys(r.options).forEach(function (L) {
         html += '<p' + (L === r.best ? ' class="ans"' : '') + '>' + L + '. ' + esc(r.options[L]) + ' (+' + pts(r, L) + ')' + (L === r.best ? ', strongest' : '') + '</p>';
       });

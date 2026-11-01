@@ -197,6 +197,8 @@
   .cl-p { flex:1; background:#fff; border-radius:1cqw; border-top:.5cqw solid var(--amber); padding:1.6cqw 1.4cqw; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; color:var(--ink); line-height:1.25; box-shadow:0 1cqw 3cqw rgba(0,0,0,.35); opacity:0; animation:castIn .8s cubic-bezier(.2,.9,.3,1.15) forwards; }
   .cl-p { display:flex; align-items:center; gap:1.2cqw; text-align:left; }
   .cl-p .L { flex:0 0 auto; background:var(--amber); color:#3b2a00; }
+  .cl-words { margin:2.6cqw 0 0; max-width:80cqw; font-family:'Montserrat', Arial, sans-serif; font-weight:700; font-size:1.7cqw; line-height:1.35; color:#fff; opacity:0; animation:spIn .9s 5.4s ease-out forwards; }
+  .cl-words b { color:var(--amber); text-transform:uppercase; letter-spacing:.2cqw; margin-right:.8cqw; }
 
   /* Countdown */
   #countdown { position:absolute; top:9.5cqw; right:3cqw; width:7cqw; height:7cqw; border-radius:50%; border:.45cqw solid var(--blue); background:#fff; display:none; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-size:3cqw; font-weight:800; color:var(--blue); }
@@ -519,7 +521,8 @@
         '<h1 class="cl-msg">' + cl.message.map(function (m, i) { return '<span style="animation-delay:' + (0.7 + i * 1.4) + 's">' + esc(m) + '</span>'; }).join('') + '</h1>' +
         '<div class="cl-prompts">' + cl.prompts.map(function (p, i) {
           return '<div class="cl-p" style="animation-delay:' + (3.6 + i * 0.5) + 's"><span class="L">' + (i + 1) + '</span><span>' + esc(p) + '</span></div>';
-        }).join('') + '</div>';
+        }).join('') + '</div>' +
+        (cl.words ? '<p class="cl-words"><b>Your words</b>' + esc(cl.words) + '</p>' : '');
       return;
     }
 

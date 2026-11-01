@@ -56,7 +56,8 @@ window.GG_GAME = {
       closing: {
         message: ["Speaking up is the first step.", "Following it through is what makes it work."],
         prompts: ["What would you say?", "What would you change?", "What would you check?"],
-        facilitator: "Ask each table for one concrete action and one sign that it has worked. Then move to the debrief and route (slide 22)."
+        words: "On paper, write the exact words Jamie says to Dave next. One person reads them out.",
+        facilitator: "Your words, about 3 minutes. Each table writes the exact words Jamie says to Dave next, then one person reads them from the paper. Nobody acts or plays a part. Listen for a line that keeps Dave talking, is clear where the line is, and keeps Sophie in the work. Then ask each table for one sign that it has worked, and move to the debrief and route (slide 22)."
       }
     }
   ],
@@ -114,10 +115,9 @@ window.GG_GAME = {
     }
   ],
 
-  // The last word, played after Round 3, to the end of the video.
+  // Archived: the old last-word settings (Sophie's film is now a part above).
   lastWord: { start: 0 },
-  // Possible closing line from Sophie, after all the options:
-  sophieLastWord: "I don't want everyone walking on eggshells. I just want them listening to what I'm saying.",
+  sophieLastWord: "",
 
   // Score bands for the winner screen (out of 15).
   bands: [

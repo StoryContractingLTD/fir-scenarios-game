@@ -2,10 +2,10 @@
 // Who's Left Standing? The content
 // Edit the words here. Keep the structure (ids, letters, brackets) as it is.
 // Each round:
-//   dave      what Dave says
+//   dave      what Neil says
 //   options   A, B, C as they appear on the phones
 //   best      the strongest option (10 points). The other two score 5.
-//   shortcut  the option that is Dave's suggestion (used for the final reveal)
+//   shortcut  the option that is Neil's suggestion (used for the final reveal)
 //   flips     which applicants each option flips down if the room picks it
 //   why       one line per option, shown at the reveal
 //   job       which job card line lights up at the reveal (0 = first line, or null)
@@ -17,7 +17,7 @@
 window.SL_GAME = {
   title: "Who's Left Standing?",
   subtitle: "Twelve applicants. One vacancy. Eight shortcuts from a busy hiring manager. Your table decides which ones the room takes.",
-  manager: "Dave",
+  manager: "Neil",
   role: "Quantity Surveyor",
 
   job: [
@@ -128,7 +128,7 @@ window.SL_GAME = {
       job: 4,
       reveal: "Month-end dates are set in advance. Joanne's compressed week already fits the role.",
       learn: {
-        head: "Was Dave describing the job, or how he's always worked?",
+        head: "Was Neil describing the job, or how he's always worked?",
         points: [
           "Most part-time workers in the UK are women, so a \"full-time now\" rule falls hardest on them.",
           "Since April 2024, employees can ask for flexible working from their first day in a job.",
@@ -136,7 +136,7 @@ window.SL_GAME = {
         ],
         fair: "These are the hours and month-end dates the job needs. Can you work them?"
       },
-      prompt: "Was Dave describing the job, or how he's always worked? What's wrong with B if it's asked politely?",
+      prompt: "Was Neil describing the job, or how he's always worked? What's wrong with B if it's asked politely?",
       notes: "B is the trap: it sounds reasonable, but only two applicants get the question, and both are women." },
 
     { title: "The licence",
@@ -154,7 +154,7 @@ window.SL_GAME = {
         C: "Bending the rule for someone we rate is bias too. Aisha goes, Lee stays."
       },
       job: 0,
-      reveal: "This time Dave's shortcut is fair. Did your table trust it, or push back out of habit?",
+      reveal: "This time Neil's shortcut is fair. Did your table trust it, or push back out of habit?",
       learn: {
         head: "Not every filter is bias. The test is whether it's needed, linked to the job and applied to everyone.",
         points: [
@@ -200,7 +200,7 @@ window.SL_GAME = {
       options: {
         A: "Judge what she said, not how she sounded: did she explain things clearly?",
         B: "Keep her in, but give her a written test nobody else gets",
-        C: "Dave's right, clear communication is on the job card. Flip her down"
+        C: "Neil's right, clear communication is on the job card. Flip her down"
       },
       best: "A", shortcut: "C",
       flips: { A: [], B: [], C: ["priya"] },
@@ -210,7 +210,7 @@ window.SL_GAME = {
         C: "It sounds like the job card, but it's judging how she sounds, not what she said."
       },
       job: 3,
-      reveal: "Did anyone else get a phone call from Dave? Or only Priya?",
+      reveal: "Did anyone else get a phone call from Neil? Or only Priya?",
       learn: {
         head: "\"Clear communicator\" is on the job card. That's what makes this one easy to get wrong.",
         points: [
@@ -221,7 +221,7 @@ window.SL_GAME = {
         fair: "Walk me through how you'd explain a cost overrun to a client."
       },
       prompt: "Is this about clarity, or about how someone sounds? Would a broad Cumbrian accent get the same treatment?",
-      notes: "Expect some tables to defend C because communication is on the job card. Ask them how Dave measured it, and whether anyone else was rung." },
+      notes: "Expect some tables to defend C because communication is on the job card. Ask them how Neil measured it, and whether anyone else was rung." },
 
     { title: "Help at interview",
       dave: "Steven wants the questions in writing at interview. If he needs help to get through an interview, he'll need help doing the job.",
@@ -263,12 +263,12 @@ window.SL_GAME = {
       why: {
         A: "Feels reasonable, but asking only the mums about childcare is the classic trap.",
         B: "Assuming a mum won't stay is an assumption about her sex, not evidence about her.",
-        C: "Asks about what the job needs, of everyone. That's the information Dave actually needs."
+        C: "Asks about what the job needs, of everyone. That's the information Neil actually needs."
       },
       job: null,
       reveal: "Danny's card mentions his son too. Nobody asked about his childcare.",
       learn: {
-        head: "Dave thinks he's predicting the future. He's making an assumption about women.",
+        head: "Neil thinks he's predicting the future. He's making an assumption about women.",
         points: [
           "Sex, and pregnancy and maternity, are protected characteristics. Turning someone down for being a mum is discrimination.",
           "Studies sending out identical CVs have found mothers rated as less committed, while fathers weren't marked down.",
@@ -276,7 +276,7 @@ window.SL_GAME = {
         ],
         fair: "The job needs these hours and this travel. Is that something you can do?"
       },
-      prompt: "Would Dave have said this about a man who'd just moved with his family? Where do these assumptions come from?",
+      prompt: "Would Neil have said this about a man who'd just moved with his family? Where do these assumptions come from?",
       notes: "Research reference if challenged: Correll, Benard and Paik (2007), 'Getting a Job: Is There a Motherhood Penalty?'. Use it as a pointer, not a statistic." },
 
     { title: "One of ours",
@@ -310,9 +310,9 @@ window.SL_GAME = {
 
   final: {
     roomAsk: "Happy with this shortlist?",
-    shortcutHead: "If every one of Dave's shortcuts had gone through",
+    shortcutHead: "If every one of Neil's shortcuts had gone through",
     shortcutDave: "Danny and Mark. Couldn't have picked better myself.",
-    shortcutNote: "Every shortcut sounded reasonable on its own. Together, they built a shortlist that looks just like Dave.",
+    shortcutNote: "Every shortcut sounded reasonable on its own. Together, they built a shortlist that looks just like Neil.",
     tagline: "Same pile of CVs. Different questions."
   }
 };
