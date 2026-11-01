@@ -184,6 +184,20 @@
   #brNext { position:absolute; z-index:3; top:2cqw; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; padding:.8cqw 2.2cqw; border-radius:99cqw; box-shadow:0 .4cqw 1.5cqw rgba(0,0,0,.4); display:none; }
   #brNext.on { display:block; }
 
+  /* Closing screen */
+  #v-closing { position:absolute; inset:0; z-index:5; overflow:hidden; background:radial-gradient(circle at 50% 30%, #0b75c9 0%, #004e8c 50%, #00284a 100%); display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 6cqw; }
+  #v-closing.on { display:flex; }
+  #v-closing::before { content:''; position:absolute; inset:-50%; background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.06) 50%, transparent 60%); animation:sheen 11s linear infinite; }
+  .cl-logo { position:absolute; top:2.6cqw; left:0; right:0; margin:0 auto; height:4.2cqw; opacity:0; animation:spIn .8s .2s ease-out forwards; }
+  .cl-eye { font-family:'Montserrat', Arial, sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.4cqw; font-size:1.2cqw; color:var(--amber); margin:0 0 1.4cqw; opacity:0; animation:spIn .8s .4s ease-out forwards; }
+  .cl-msg { margin:0 0 3.4cqw; }
+  .cl-msg span { display:block; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:3.6cqw; line-height:1.2; color:#fff; opacity:0; animation:spIn .9s ease-out forwards; }
+  .cl-msg span + span { color:var(--amber); }
+  .cl-prompts { display:flex; gap:1.6cqw; width:100%; max-width:80cqw; }
+  .cl-p { flex:1; background:#fff; border-radius:1cqw; border-top:.5cqw solid var(--amber); padding:1.6cqw 1.4cqw; font-family:'Montserrat', Arial, sans-serif; font-weight:800; font-size:2cqw; color:var(--ink); line-height:1.25; box-shadow:0 1cqw 3cqw rgba(0,0,0,.35); opacity:0; animation:castIn .8s cubic-bezier(.2,.9,.3,1.15) forwards; }
+  .cl-p { display:flex; align-items:center; gap:1.2cqw; text-align:left; }
+  .cl-p .L { flex:0 0 auto; background:var(--amber); color:#3b2a00; }
+
   /* Countdown */
   #countdown { position:absolute; top:9.5cqw; right:3cqw; width:7cqw; height:7cqw; border-radius:50%; border:.45cqw solid var(--blue); background:#fff; display:none; align-items:center; justify-content:center; font-family:'Montserrat', Arial, sans-serif; font-size:3cqw; font-weight:800; color:var(--blue); }
   #countdown.on { display:flex; }
@@ -269,6 +283,7 @@
     <section id="v-video"><div id="videoBox"></div><div id="vidLabel"></div><div id="vidCard"><p id="vidCardText"></p></div></section>
     <section id="v-bridge"><img id="brImg" alt=""><div class="br-wrap" id="brBox"></div><div id="brNext">Hit next to proceed</div></section>
     <section id="v-fallout"><div id="foBox"></div><div class="fo-ask" id="foAsk"><p class="fo-eye">Talk it through</p><p id="foQ"></p></div></section>
+    <section id="v-closing"><div id="clBox"></div></section>
     <section id="v-still"><img id="stillImg" alt=""><div id="stillSubs"></div><div id="stillNext">Hit next to proceed</div><div id="stillAsk"><h2 id="askHead"></h2><ol id="askList"></ol></div></section>
     <div id="countdown"></div>
   </div>
@@ -330,6 +345,7 @@
         break;
       case 'reveal': stopAudio(); play(S.reveal, 1); break;
       case 'winner': stopAudio(); play(S.showEnd, 0.6, true, true); break;
+      case 'closing': stopAudio(); play(S.showEnd, 0.3, true, true); break;
       case 'bridge':
         stopAudio();
         var br = G.rounds[st.round].bridge, brShown = -1;
@@ -493,6 +509,19 @@
     // Optional background image behind the question and the room split
     var bgOn = q && q.bg && ['question', 'voting', 'closed', 'split'].indexOf(st.phase) > -1;
     el('panel').style.background = bgOn ? 'linear-gradient(rgba(255,255,255,.86), rgba(255,255,255,.86)), url(' + IMG + q.bg + ') center / cover no-repeat' : '';
+
+    if (st.phase === 'closing') {
+      var cl = G.parts[st.part].closing;
+      showSection('v-closing');
+      el('clBox').innerHTML =
+        '<img class="cl-logo" src="' + IMG + C.images.logo + '" alt="Story">' +
+        '<p class="cl-eye">' + esc(G.title) + '</p>' +
+        '<h1 class="cl-msg">' + cl.message.map(function (m, i) { return '<span style="animation-delay:' + (0.7 + i * 1.4) + 's">' + esc(m) + '</span>'; }).join('') + '</h1>' +
+        '<div class="cl-prompts">' + cl.prompts.map(function (p, i) {
+          return '<div class="cl-p" style="animation-delay:' + (3.6 + i * 0.5) + 's"><span class="L">' + (i + 1) + '</span><span>' + esc(p) + '</span></div>';
+        }).join('') + '</div>';
+      return;
+    }
 
     if (st.phase === 'bridge') {
       var b = G.rounds[st.round].bridge, chars = G.characters || {};

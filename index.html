@@ -156,7 +156,7 @@
   (G.parts || []).forEach(function (p, pi) {
     // q carries the part number for the story steps, so the phones know which part is on
     STEPS.push({ phase: 'video', q: pi, round: -1, part: pi });
-    STEPS.push({ phase: 'still', q: pi, round: -1, part: pi });
+    STEPS.push({ phase: p.closing ? 'closing' : 'still', q: pi, round: -1, part: pi });
     G.rounds.forEach(function (r, ri) { if (r.afterPart === pi) pushRound(r, ri); });
   });
   G.rounds.forEach(function (r, ri) { if (r.afterPart == null) pushRound(r, ri); });
@@ -179,6 +179,7 @@
       case 'reveal': return R + ': reveal and scores';
       case 'split': return R + ': how the room voted';
       case 'fallout': return R + ': what happens with ' + s.opt;
+      case 'closing': return 'Closing screen';
       case 'bridge': return 'Bridge: ' + (G.rounds[s.round].bridge.heading || 'moving on');
       case 'later': return R + ': three weeks later';
       case 'scoreboard': return 'Scoreboard after ' + R;
@@ -387,6 +388,7 @@
     else if (s.phase === 'still') html = '<p>The still is up with the dialogue. When the big screen says "Hit next to proceed", press Next.</p><p><span class="lbl">Dialogue:</span> ' + esc(G.parts[s.part].subtitles) + '</p>';
     else if (s.phase === 'split') html = '<p>How the room voted, by table. Ask a table or two why they chose what they did.</p>' + (q.note ? '<p><span class="lbl">Pointers:</span> ' + esc(q.note) + '</p>' : '');
     else if (s.phase === 'fallout') html = '<p><span class="lbl">' + s.opt + '. ' + esc(q.options[s.opt]) + '</span></p><p>The voiceover plays, then the discussion question appears.</p><p><span class="lbl">On screen:</span> ' + esc(q.why[s.opt]) + '</p>' + (q.notes && q.notes[s.opt] ? '<p><span class="lbl">Notes:</span> ' + esc(q.notes[s.opt]) + '</p>' : '') + '<p><span class="lbl">Voiceover:</span> ' + esc(q.later[s.opt]) + '</p>';
+    else if (s.phase === 'closing') html = '<p>' + esc(G.parts[s.part].closing.facilitator) + '</p>';
     else if (s.phase === 'bridge') { var bb = G.rounds[s.round].bridge; html = '<p>The bridge plays, then press Next.' + (bb.say ? ' Say first: "' + esc(bb.say) + '"' : '') + '</p><p><span class="lbl">Voiceover:</span> ' + esc(bb.panels.map(function (p) { return p.text; }).join(' ')) + '</p>'; }
     else if (s.phase === 'lastword') html = '<p>The last word is playing. The final scores follow by themselves.</p>';
     else if (s.phase === 'scoreboard') html = '<p>Scores so far, then Next for the next scene.</p>';

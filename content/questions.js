@@ -7,7 +7,7 @@
 // Times are in seconds (1:55 = 115).
 // =====================================================================
 window.GG_GAME = {
-  title: "[Scenario title]",
+  title: "Nothing In It",
 
   // ---- The story parts, played in order after you press Start ----
   // Each part: the video plays, then the still shows. Either a voice with
@@ -47,8 +47,18 @@ window.GG_GAME = {
       still: "part3-still.png",
       audio: "part3-question.mp3",
       subtitles: "Dave believes he is doing what Jamie asked. Sophie is now missing information she needs for her work. What does Jamie do next?"
+    },
+    {
+      title: "Sophie's film",
+      vimeoId: "1242056497",
+      vimeoHash: "3cdd785921",
+      // No still after this one: the closing screen follows instead.
+      closing: {
+        message: ["Speaking up is the first step.", "Following it through is what makes it work."],
+        prompts: ["What would you say?", "What would you change?", "What would you check?"],
+        facilitator: "Ask each table for one concrete action and one sign that it has worked. Then move to the debrief and route (slide 22)."
+      }
     }
-    // Sophie's closing film goes here, once it's made.
   ],
 
   // ---- Voting rounds: switched off for now (empty list). ----
